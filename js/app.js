@@ -1086,13 +1086,26 @@ function renderEtymology(word, wordIndex) {
         : 'LA';
       var latinHint = p.latinIPA ? '<div class="latin-pronounce-hint">🏹 拉丁: ' + p.latinIPA + '</div>' : '';
       return '<div class="ety-syl-card">'
-        + '<div class="ety-syl-part">' + p.syl + '</div>'
+        + '<div class="ety-syl-part">' + p.syl + ' <button class="syl-speak-btn" data-syl="' + p.syl.replace(/"/g, '&quot;') + '" title="听音节发音">🔊</button></div>'
         + '<div class="ety-syl-ipa">' + (p.ipa || '') + '</div>'
         + latinHint
         + '<span class="ety-syl-lang ' + langClass + '">' + langLabel + '</span>'
         + '<div class="ety-syl-note">' + (p.note || '') + '</div>'
         + '</div>';
     }).join('');
+
+    // Add click handlers for syllable speak buttons
+    setTimeout(function() {
+      document.querySelectorAll('.syl-speak-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var syl = this.dataset.syl;
+          // Remove dots and hyphens, keep the core syllable text
+          var cleanSyl = syl.replace(/[·\-]/g, '').trim();
+          if (cleanSyl) speakWord(cleanSyl);
+        });
+      });
+    }, 50);
   }
 
   if (storyEl && ety.story) {
