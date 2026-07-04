@@ -945,10 +945,10 @@ function renderFlashcard() {
   document.getElementById('flashcard-counter').textContent = (idx + 1) + ' / ' + list.length;
   var learnedBtn = document.getElementById('flashcard-learned-btn');
   if (isLearned) {
-    learnedBtn.textContent = '✅ 已掌握';
+    learnedBtn.textContent = '💾 已保存';
     learnedBtn.classList.add('is-learned');
   } else {
-    learnedBtn.textContent = '✅ 标记已掌握';
+    learnedBtn.textContent = '💾 保存';
     learnedBtn.classList.remove('is-learned');
   }
   updateFlashcardProgress();
@@ -1024,9 +1024,10 @@ function toggleFlashcardLearned() {
   if (list.length === 0) return;
   var wordIdx = list[flashcardState.index];
   toggleLearned(wordIdx);
-  renderFlashcard();
   updateProgress();
   updateStreak();
+  // Auto-advance to next card
+  navigateFlashcard(1);
 }
 
 function updateFlashcardProgress() {
