@@ -54,10 +54,14 @@ function setupEventListeners() {
     closeWordPopup();
   });
   document.querySelector('.word-popup-overlay')?.addEventListener('click', function(e) {
-    // Close if clicking the transparent overlay (not the popup itself)
     if (!e.target.closest('.word-popup') && !e.target.closest('.syl-popup')) {
       closeWordPopup();
     }
+  });
+
+  // Sidebar close
+  document.querySelector('.sidebar-close')?.addEventListener('click', function() {
+    document.getElementById('word-sidebar').classList.remove('active');
   });
 
   // Scroll to top
@@ -236,7 +240,8 @@ function renderArticle(index) {
   document.querySelectorAll('.article-word-chip').forEach(chip => {
     chip.addEventListener('click', (e) => {
       const idx = parseInt(chip.dataset.wordIndex);
-      showWordPopup(idx, index, e);
+      showWordSidebar(idx);
+      speakWord(WORDS[idx].word);  // Auto-pronounce
     });
 
     const speakBtn = chip.querySelector('.chip-speak');
@@ -251,9 +256,9 @@ function renderArticle(index) {
   document.querySelectorAll('.vocab-word').forEach(el => {
     el.addEventListener('click', (e) => {
       const idx = parseInt(el.dataset.wordIndex);
-      showWordPopup(idx, index, e);
-      // Cross-highlight: find matching CN word in the same paragraph pair
-      highlightCNMatch(el);
+      showWordSidebar(idx);           // Show in upper-right panel
+      speakWord(WORDS[idx].word);     // Auto-pronounce
+      highlightCNMatch(el);            // Cross-highlight CN word
     });
   });
 
@@ -327,6 +332,58 @@ function highlightCNMatch(enElement) {
     // Scroll CN word into view if needed
     allCnWords[wordIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
+}
+
+// Show word info in upper-right sidebar panel
+function showWordSidebar(wordIndex) {
+  var sidebar = document.getElementById('word-sidebar');
+  if (!sidebar) return;
+
+  var word = WORDS[wordIndex];
+  var ety = typeof ETYMOLOGY !== 'undefined' ? ETYMOLOGY[word.word] : null;
+
+  // Populate sidebar
+  sidebar.querySelector('.sidebar-word').textContent = word.word;
+  sidebar.querySelector('.sidebar-phonetic').textContent = word.phonetic;
+  sidebar.querySelector('.sidebar-meaning').textContent = word.meaning;
+
+  // Syllable chips
+  var sylContainer = sidebar.querySelector('.sidebar-syllables');
+  if (ety && ety.parts) {
+    sylContainer.innerHTML = ety.parts.map(function(p) {
+      return '<div class="sidebar-syl-chip" data-syl="' + p.syl.replace(/"/g, '&quot;') + '">' +
+        '<span class="syl-text">' + p.syl + '</span>' +
+        '<span class="syl-ipa">' + (p.ipa || '') + '</span>' +
+        '<span class="syl-speak-icon">🔊</span>' +
+        '</div>';
+    }).join('');
+
+    // Add click handlers for syllable chips
+    setTimeout(function() {
+      sylContainer.querySelectorAll('.sidebar-syl-chip').forEach(function(chip) {
+        chip.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var syl = this.dataset.syl;
+          var cleanSyl = syl.replace(/[·\-]/g, '').trim();
+          if (cleanSyl) speakWord(cleanSyl);
+          // Also show multi-language popup
+          var partData = ety.parts.find(function(p) { return p.syl === syl; });
+          showSylPopup(this.querySelector('.syl-text'), syl, partData);
+        });
+      });
+    }, 30);
+  } else {
+    sylContainer.innerHTML = '<div style="font-size:12px;color:var(--text-muted)">' + word.syllables + '</div>';
+  }
+
+  // Prepare speak button
+  var speakBtn = sidebar.querySelector('.sidebar-speak-all');
+  var newSpeak = speakBtn.cloneNode(true);
+  speakBtn.parentNode.replaceChild(newSpeak, speakBtn);
+  newSpeak.addEventListener('click', function() { speakWord(word.word); });
+
+  // Show sidebar
+  sidebar.classList.add('active');
 }
 
 // --- Word Popup ---
