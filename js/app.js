@@ -253,7 +253,8 @@ function renderArticle(index) {
     // Convert **text** to <strong class="cn-vocab">text</strong>
     var cnHTML = cnText.replace(/\*\*(.+?)\*\*/g, '<strong class="cn-vocab">$1</strong>');
     return '<div class="para-pair">' +
-      '<p class="en-para">' + highlightWords(para, articleWords) + '</p>' +
+      '<p class="en-para" data-para="' + i + '">' + highlightWords(para, articleWords) +
+        '<span class="para-speak" title="朗读本段">🔊</span></p>' +
       '<p class="cn-para">' + cnHTML + '</p>' +
       '</div>';
   }).join('');
@@ -338,6 +339,24 @@ function renderArticle(index) {
       }
     });
   }
+
+  // Paragraph speaker icons
+  document.querySelectorAll('.para-speak').forEach(function(icon) {
+    icon.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var paraEl = this.closest('.en-para');
+      if (paraEl) speakParagraph(paraEl.textContent.replace('🔊', '').trim());
+    });
+  });
+
+  // Double-click on paragraph → read sentence at click position
+  document.querySelectorAll('.en-para').forEach(function(para) {
+    para.addEventListener('dblclick', function(e) {
+      e.stopPropagation();
+      var sentence = getSentenceAtPoint(e.clientX, e.clientY);
+      if (sentence) speakParagraph(sentence);
+    });
+  });
 }
 
 function highlightWords(text, articleWords) {
@@ -1604,6 +1623,51 @@ function highlightReadingPara(idx) {
     paras[idx].classList.add('reading');
     paras[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
+}
+
+// Speak a single paragraph or sentence
+function speakParagraph(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  var clean = text.replace(/\*\*/g, '').replace(/<[^>]+>/g, '').trim();
+  if (!clean) return;
+  var u = new SpeechSynthesisUtterance(clean);
+  u.lang = 'en-US'; u.rate = 0.9;
+  var voices = window.speechSynthesis.getVoices();
+  var v = voices.find(function(vo) { return vo.lang.startsWith('en-US'); });
+  if (v) u.voice = v;
+  window.speechSynthesis.speak(u);
+}
+
+// Extract the sentence at a given screen position
+function getSentenceAtPoint(x, y) {
+  var range;
+  if (document.caretRangeFromPoint) {
+    range = document.caretRangeFromPoint(x, y);
+  } else if (document.caretPositionFromPoint) {
+    var pos = document.caretPositionFromPoint(x, y);
+    if (pos) { range = document.createRange(); range.setStart(pos.offsetNode, pos.offset); range.collapse(true); }
+  }
+  if (!range || !range.startContainer || range.startContainer.nodeType !== 3) return null;
+
+  var text = range.startContainer.textContent;
+  var offset = range.startOffset;
+
+  // Find sentence boundaries (. ! ? followed by space or end)
+  var start = offset, end = offset;
+  while (start > 0) {
+    start--;
+    if (/[.!?]/.test(text[start]) && (start + 1 >= text.length || /\s/.test(text[start + 1]))) {
+      start++; break;
+    }
+  }
+  while (end < text.length) {
+    if (/[.!?]/.test(text[end]) && (end + 1 >= text.length || /\s/.test(text[end + 1]))) {
+      end++; break;
+    }
+    end++;
+  }
+  return text.substring(start, end).trim();
 }
 
 function stopReading() {
