@@ -1099,10 +1099,15 @@ function renderEtymology(word, wordIndex) {
       document.querySelectorAll('.syl-speak-btn').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
           e.stopPropagation();
+          e.preventDefault();
           var syl = this.dataset.syl;
+          // Find the matching part data
+          var partData = ety.parts.find(function(p) { return p.syl === syl; });
           // Remove dots and hyphens, keep the core syllable text
           var cleanSyl = syl.replace(/[·\-]/g, '').trim();
           if (cleanSyl) speakWord(cleanSyl);
+          // Show multi-language popup
+          showSylPopup(this, syl, partData);
         });
       });
     }, 50);
@@ -1112,6 +1117,159 @@ function renderEtymology(word, wordIndex) {
     storyEl.innerHTML = '<div class="ety-story-label">📚 词源小故事</div>' + ety.story;
   } else if (storyEl) {
     storyEl.innerHTML = '';
+  }
+}
+
+// ============================================================
+// Syllable Multi-Language Popup
+// ============================================================
+
+// Root glosses lookup: common Greek/Latin roots → multi-language meanings
+var ROOT_GLOSSES = {
+  // Prefixes
+  "hypo":   { latin: "sub- (下)",        french: "hypo- (sous)",        chinese: "在...之下",       spanish: "hipo- (bajo)" },
+  "hyper":  { latin: "super- (上)",      french: "hyper- (sur)",        chinese: "在...之上，过度",  spanish: "hiper- (sobre)" },
+  "sub":    { latin: "sub- (下)",        french: "sous-",               chinese: "在...之下",       spanish: "sub- (bajo)" },
+  "super":  { latin: "super- (上)",      french: "sur-",                chinese: "在...之上，超级",  spanish: "super- (sobre)" },
+  "pre":    { latin: "prae- (前)",       french: "pré- (avant)",        chinese: "在...之前，预",    spanish: "pre- (antes)" },
+  "re":     { latin: "re- (再次、回)",    french: "re- (de nouveau)",    chinese: "再次，返回",       spanish: "re- (de nuevo)" },
+  "con":    { latin: "con- (一起)",       french: "con- (avec)",         chinese: "共同，一起",       spanish: "con- (con)" },
+  "dis":    { latin: "dis- (分开)",       french: "dé- (séparer)",       chinese: "分开，否定",       spanish: "des- (separar)" },
+  "ex":     { latin: "ex- (向外)",        french: "ex- (hors de)",       chinese: "向外，出",         spanish: "ex- (fuera)" },
+  "in":     { latin: "in- (进入/不)",     french: "in- (dans/pas)",      chinese: "进入，不",         spanish: "in- (en/no)" },
+  "ad":     { latin: "ad- (朝向)",        french: "a- (vers)",           chinese: "朝向，附加",       spanish: "a- (hacia)" },
+  "trans":  { latin: "trans- (跨越)",     french: "trans- (à travers)",  chinese: "跨越，转变",       spanish: "trans- (a través)" },
+  "inter":  { latin: "inter- (之间)",     french: "entre-",              chinese: "在...之间",       spanish: "inter- (entre)" },
+  "per":    { latin: "per- (通过)",       french: "par- (à travers)",    chinese: "通过，彻底",       spanish: "per- (por)" },
+  "pro":    { latin: "pro- (向前)",       french: "pro- (en avant)",     chinese: "向前，支持",       spanish: "pro- (adelante)" },
+
+  // Roots
+  "thes":   { latin: "thesis (放置)",     french: "thèse",               chinese: "放置，命题",       spanish: "tesis" },
+  "gen":    { latin: "genus (起源、种类)", french: "gène",               chinese: "起源，基因，产生",  spanish: "gen (origen)" },
+  "graph":  { latin: "graphia (书写)",    french: "graphe",              chinese: "书写，记录",       spanish: "grafía (escritura)" },
+  "log":    { latin: "logia (学说)",      french: "logie",               chinese: "学说，言语",       spanish: "logía (estudio)" },
+  "bio":    { latin: "vita (生命)",       french: "bio (vie)",           chinese: "生命，生物",       spanish: "bio (vida)" },
+  "geo":    { latin: "terra (地球)",      french: "géo (terre)",         chinese: "地球，土地",       spanish: "geo (tierra)" },
+  "chron":  { latin: "tempus (时间)",     french: "chrono (temps)",      chinese: "时间",            spanish: "crono (tiempo)" },
+  "path":   { latin: "passio (感受、病)",  french: "patho (souffrance)",  chinese: "感受，疾病",       spanish: "pato (enfermedad)" },
+  "psych":  { latin: "anima (灵魂、心智)", french: "psyché (âme)",        chinese: "心灵，精神",       spanish: "psique (alma)" },
+  "morph":  { latin: "forma (形态)",      french: "morphe (forme)",      chinese: "形态，形状",       spanish: "morfo (forma)" },
+  "phon":   { latin: "sonus (声音)",      french: "phone (son)",         chinese: "声音",            spanish: "fono (sonido)" },
+  "scope":  { latin: "spectare (看)",     french: "scope (voir)",        chinese: "看，观察",         spanish: "scopio (mirar)" },
+  "meter":  { latin: "mensura (测量)",    french: "mètre (mesure)",      chinese: "测量，计量",       spanish: "metro (medida)" },
+  "nym":    { latin: "nomen (名称)",      french: "nyme (nom)",          chinese: "名称，字",         spanish: "nimo (nombre)" },
+  "sphere": { latin: "sphaera (球)",      french: "sphère (boule)",      chinese: "球，球体",         spanish: "esfera (bola)" },
+  "tract":  { latin: "trahere (拉)",      french: "tracter (tirer)",     chinese: "拉，牵引",         spanish: "traer (tirar)" },
+  "struct": { latin: "struere (建造)",    french: "structure (bâtir)",   chinese: "建造，结构",       spanish: "structura (construir)" },
+  "dict":   { latin: "dicere (说)",       french: "dire",                chinese: "说，宣告",         spanish: "decir" },
+  "script": { latin: "scribere (写)",     french: "écrire",              chinese: "写",              spanish: "escribir" },
+  "vid":    { latin: "videre (看)",       french: "voir",                chinese: "看",              spanish: "ver" },
+  "voc":    { latin: "vocare (呼唤)",     french: "voix (voix)",         chinese: "声音，呼唤",       spanish: "voz (llamar)" },
+  "cap":    { latin: "capere (拿取)",     french: "capturer (prendre)",  chinese: "拿，取，抓",       spanish: "capturar (tomar)" },
+  "fac":    { latin: "facere (做)",       french: "faire",               chinese: "做，制造",         spanish: "hacer" },
+  "mit":    { latin: "mittere (发送)",    french: "mettre (envoyer)",    chinese: "发送，放出",       spanish: "meter (enviar)" },
+  "port":   { latin: "portare (携带)",    french: "porter",              chinese: "携带，搬运",       spanish: "portar (llevar)" },
+  "rupt":   { latin: "rumpere (打破)",    french: "rompre (casser)",     chinese: "打破，断裂",       spanish: "romper" },
+  "sect":   { latin: "secare (切割)",     french: "section (couper)",    chinese: "切割",            spanish: "seccionar (cortar)" },
+  "sens":   { latin: "sentire (感觉)",    french: "sentir",              chinese: "感觉，感知",       spanish: "sentir" },
+  "spec":   { latin: "specere (看)",      french: "spectacle (regarder)", chinese: "看，观察",         spanish: "espectar (mirar)" },
+  "tend":   { latin: "tendere (伸展)",    french: "tendre (étirer)",     chinese: "伸展，倾向",       spanish: "tender (estirar)" },
+  "ven":    { latin: "venire (来)",       french: "venir",               chinese: "来，到达",         spanish: "venir" },
+  "vert":   { latin: "vertere (转)",      french: "verser (tourner)",    chinese: "转动，转变",       spanish: "verter (girar)" },
+
+  // Suffixes
+  "tion":   { latin: "-tio (名词化)",      french: "-tion",               chinese: "动作/状态（名词）", spanish: "-ción" },
+  "sis":    { latin: "-sis (过程/状态)",   french: "-se",                 chinese: "过程，状态",       spanish: "-sis" },
+  "ic":     { latin: "-icus (属于...的)",  french: "-ique",               chinese: "...的（形容词）",   spanish: "-ico" },
+  "al":     { latin: "-alis (关于...的)",  french: "-al",                 chinese: "关于...的",        spanish: "-al" },
+  "ive":    { latin: "-ivus (倾向...的)",  french: "-if/-ive",            chinese: "有...倾向的",      spanish: "-ivo" },
+  "ate":    { latin: "-atus (使...化)",    french: "-er",                 chinese: "使...化（动词）",   spanish: "-ar" },
+  "ment":   { latin: "-mentum (结果/手段)", french: "-ment",              chinese: "结果，手段",       spanish: "-mento" },
+  "ance":   { latin: "-antia (状态)",      french: "-ance",               chinese: "状态，性质",       spanish: "-ancia" },
+  "ure":    { latin: "-ura (结果)",        french: "-ure",                chinese: "结果，动作",       spanish: "-ura" },
+  "ity":    { latin: "-itas (性质)",       french: "-ité",                chinese: "性质，状态",       spanish: "-idad" },
+  "ous":    { latin: "-osus (充满...的)",  french: "-eux/-euse",          chinese: "充满...的",        spanish: "-oso" },
+  "ize":    { latin: "-izare (使...化)",   french: "-iser",               chinese: "使...化",          spanish: "-izar" },
+  "ist":    { latin: "-ista (...的人)",    french: "-iste",               chinese: "...的人/专家",     spanish: "-ista" },
+  "ism":    { latin: "-ismus (...主义)",   french: "-isme",               chinese: "...主义/学说",     spanish: "-ismo" },
+};
+
+function findRootGloss(syl) {
+  // Clean the syllable: remove dots, hyphens, trailing hyphens
+  var clean = syl.replace(/[·\-]/g, '').toLowerCase();
+  // Try exact match first
+  if (ROOT_GLOSSES[clean]) return ROOT_GLOSSES[clean];
+  // Try removing trailing letters (handle declensions)
+  var short = clean.replace(/[aeiou]s?$/, '').replace(/[aeiou]m?$/, '');
+  if (short.length >= 2 && ROOT_GLOSSES[short]) return ROOT_GLOSSES[short];
+  // Try prefix match (root at start)
+  for (var key in ROOT_GLOSSES) {
+    if (clean.indexOf(key) === 0 && key.length >= 3) return ROOT_GLOSSES[key];
+  }
+  return null;
+}
+
+function showSylPopup(btnElement, syl, partData) {
+  var popup = document.getElementById('syl-popup');
+  if (!popup) return;
+
+  // Fill data
+  popup.querySelector('.syl-popup-text').textContent = syl;
+  popup.querySelector('.syl-popup-ipa').textContent = partData ? (partData.ipa || '') : '';
+  popup.querySelector('.syl-popup-note').textContent = partData ? (partData.note || '') : '';
+
+  // Look up glosses
+  var gloss = findRootGloss(syl);
+  var langRows = popup.querySelectorAll('.syl-lang-val');
+
+  // English: show IPA/syllable description
+  langRows[0].textContent = partData ? (partData.ipa || syl) : syl;
+
+  if (gloss) {
+    langRows[1].textContent = gloss.latin || '';
+    langRows[2].textContent = gloss.french || '';
+    langRows[3].textContent = gloss.chinese || '';
+    langRows[4].textContent = gloss.spanish || '';
+  } else if (partData) {
+    // Fallback: use language tag + Latin IPA
+    langRows[1].textContent = partData.latinIPA || (partData.lang.indexOf('拉丁') >= 0 ? '(拉丁词源)' : '');
+    langRows[2].textContent = partData.lang.indexOf('法') >= 0 ? '(法语词源)' : '';
+    langRows[3].textContent = partData.note ? partData.note.substring(0, 40) : '';
+    langRows[4].textContent = '';
+  }
+
+  // Position near the button
+  var rect = btnElement.getBoundingClientRect();
+  var popupW = 260;
+  var left = Math.min(rect.left + (rect.width / 2) - (popupW / 2), window.innerWidth - popupW - 10);
+  left = Math.max(left, 10);
+  var top = rect.bottom + 10;
+  if (top + 280 > window.innerHeight) {
+    top = rect.top - 290;
+  }
+
+  popup.style.left = left + 'px';
+  popup.style.top = top + 'px';
+  popup.classList.add('active');
+
+  // Close on outside click
+  setTimeout(function() {
+    function closeSyl(e) {
+      if (!popup.contains(e.target)) {
+        popup.classList.remove('active');
+        document.removeEventListener('click', closeSyl);
+      }
+    }
+    document.addEventListener('click', closeSyl);
+  }, 10);
+
+  // Close button
+  var closeBtn = popup.querySelector('.syl-popup-close');
+  if (closeBtn && !closeBtn._bound) {
+    closeBtn._bound = true;
+    closeBtn.addEventListener('click', function() {
+      popup.classList.remove('active');
+    });
   }
 }
 
