@@ -243,6 +243,7 @@ function renderArticle(index) {
       '<button class="article-nav-btn prev-article" ' + (index === 0 ? 'disabled' : '') + '>← 上一篇</button>' +
       '<span class="article-nav-info">' + article.cnTitle + '</span>' +
       '<button class="article-nav-btn read-aloud-btn" title="朗读全文">🔊 全文朗读</button>' +
+      '<button class="article-nav-btn voice-toggle" title="切换发音人">🎙️ <span class="voice-label">VOA</span></button>' +
       '<button class="article-nav-btn next-article" ' + (index >= ARTICLES.length - 1 ? 'disabled' : '') + '>下一篇 →</button>' +
     '</div>';
 
@@ -260,6 +261,9 @@ function renderArticle(index) {
   }).join('');
 
   contentDiv.innerHTML = headersHTML + pairsHTML;
+
+  // Init voice toggle
+  setTimeout(initVoiceToggle, 100);
 
   // Latin poetry section
   renderLatinPoem(index);
@@ -616,34 +620,108 @@ function closeWordPopup() {
   document.querySelector('.word-popup').classList.remove('active');
 }
 
-// --- Speak (Web Speech API) ---
-function speakWord(word) {
-  if (!window.speechSynthesis) {
-    alert('您的浏览器不支持语音功能，请使用 Chrome 或 Safari。');
-    return;
-  }
+// ============================================================
+// Voice Engine — BBC (UK) / VOA (US) male/female
+// ============================================================
 
-  // Cancel any ongoing speech
+var voiceMode = localStorage.getItem('voiceMode') || 'voa-male'; // voa-male | voa-female | bbc-male | bbc-female
+
+var VOICE_MODES = [
+  { id: 'voa-male',   label: 'VOA ♂', lang: 'en-US', gender: 'male',   rate: 0.90, desc: 'VOA 美音男声' },
+  { id: 'voa-female', label: 'VOA ♀', lang: 'en-US', gender: 'female', rate: 0.95, desc: 'VOA 美音女声' },
+  { id: 'bbc-male',   label: 'BBC ♂', lang: 'en-GB', gender: 'male',   rate: 0.85, desc: 'BBC 英音男声' },
+  { id: 'bbc-female', label: 'BBC ♀', lang: 'en-GB', gender: 'female', rate: 0.90, desc: 'BBC 英音女声' },
+];
+
+function getVoiceConfig() {
+  return VOICE_MODES.find(function(m) { return m.id === voiceMode; }) || VOICE_MODES[0];
+}
+
+function findBestVoice(lang, gender) {
+  var voices = window.speechSynthesis.getVoices();
+  if (voices.length === 0) return null;
+
+  // Score each voice: exact match > partial match > fallback
+  var scored = voices.map(function(v) {
+    var score = 0;
+    var vl = v.lang.toLowerCase();
+    var vn = v.name.toLowerCase();
+
+    // Language match
+    if (vl === lang) score += 100;
+    else if (vl.startsWith(lang.split('-')[0])) score += 50;
+    else if (vl.startsWith('en')) score += 20;
+
+    // Gender match (heuristic: female voices often have "female" or feminine names)
+    var isFemale = vn.indexOf('female') >= 0 || vn.indexOf('woman') >= 0 ||
+                   vn.indexOf('samantha') >= 0 || vn.indexOf('lisa') >= 0 ||
+                   vn.indexOf('karen') >= 0 || vn.indexOf('moira') >= 0 ||
+                   vn.indexOf('fiona') >= 0 || vn.indexOf('susan') >= 0 ||
+                   vn.indexOf('zira') >= 0 || vn.indexOf('veena') >= 0;
+    if (gender === 'female' && isFemale) score += 30;
+    else if (gender === 'male' && !isFemale) score += 30;
+
+    // Prefer Google/System voices (higher quality)
+    if (vn.indexOf('google') >= 0) score += 40;
+    else if (vn.indexOf('microsoft') >= 0) score += 20;
+    else if (vn.indexOf('apple') >= 0) score += 15;
+
+    // Prefer "natural" or "premium" or "wavenet" voices
+    if (vn.indexOf('natural') >= 0 || vn.indexOf('premium') >= 0 || vn.indexOf('wavenet') >= 0) score += 25;
+
+    return { voice: v, score: score };
+  });
+
+  scored.sort(function(a, b) { return b.score - a.score; });
+  return scored[0] && scored[0].score > 0 ? scored[0].voice : null;
+}
+
+function speakWord(word) {
+  if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
 
-  const utterance = new SpeechSynthesisUtterance(word);
-  utterance.lang = 'en-US';
-  utterance.rate = 0.85;
-  utterance.pitch = 1;
-  utterance.volume = 1;
+  var config = getVoiceConfig();
+  var u = new SpeechSynthesisUtterance(word);
+  u.lang = config.lang;
+  u.rate = config.rate;
+  u.pitch = 1;
+  u.volume = 1;
 
-  // Try to find a good English voice
-  const voices = window.speechSynthesis.getVoices();
-  const englishVoice = voices.find(v => v.lang.startsWith('en-US') && v.name.includes('Google'))
-    || voices.find(v => v.lang.startsWith('en-US'))
-    || voices.find(v => v.lang.startsWith('en'));
+  var voice = findBestVoice(config.lang, config.gender);
+  if (voice) u.voice = voice;
 
-  if (englishVoice) {
-    utterance.voice = englishVoice;
-  }
-
-  window.speechSynthesis.speak(utterance);
+  window.speechSynthesis.speak(u);
 }
+
+function cycleVoice() {
+  var idx = VOICE_MODES.findIndex(function(m) { return m.id === voiceMode; });
+  idx = (idx + 1) % VOICE_MODES.length;
+  voiceMode = VOICE_MODES[idx].id;
+  localStorage.setItem('voiceMode', voiceMode);
+  updateVoiceLabel();
+}
+
+function updateVoiceLabel() {
+  var config = getVoiceConfig();
+  var label = document.querySelector('.voice-label');
+  if (label) label.textContent = config.label;
+}
+
+function initVoiceToggle() {
+  updateVoiceLabel();
+  var btn = document.querySelector('.voice-toggle');
+  if (btn && !btn._voiceBound) {
+    btn._voiceBound = true;
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      cycleVoice();
+      // Speak a sample word so user hears the voice change
+      speakWord('English');
+    });
+  }
+}
+
+// --- Speak (Web Speech API) OLD - replaced above ---
 
 // --- Word List View ---
 function renderWordList(filter) {
@@ -1588,16 +1666,13 @@ function speakNextParagraph() {
   var text = readAloudState.paragraphs[idx].replace(/\*\*/g, '').replace(/<[^>]+>/g, '');
   highlightReadingPara(idx);
 
+  var config = getVoiceConfig();
   var utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'en-US';
-  utterance.rate = 0.9;
+  utterance.lang = config.lang;
+  utterance.rate = config.rate;
   utterance.pitch = 1;
-
-  var voices = window.speechSynthesis.getVoices();
-  var enVoice = voices.find(function(v) { return v.lang.startsWith('en-US') && v.name.includes('Google'); })
-    || voices.find(function(v) { return v.lang.startsWith('en-US'); })
-    || voices.find(function(v) { return v.lang.startsWith('en'); });
-  if (enVoice) utterance.voice = enVoice;
+  var voice = findBestVoice(config.lang, config.gender);
+  if (voice) utterance.voice = voice;
 
   utterance.onend = function() {
     readAloudState.currentPara++;
@@ -1631,11 +1706,12 @@ function speakParagraph(text) {
   window.speechSynthesis.cancel();
   var clean = text.replace(/\*\*/g, '').replace(/<[^>]+>/g, '').trim();
   if (!clean) return;
+  var config = getVoiceConfig();
   var u = new SpeechSynthesisUtterance(clean);
-  u.lang = 'en-US'; u.rate = 0.9;
-  var voices = window.speechSynthesis.getVoices();
-  var v = voices.find(function(vo) { return vo.lang.startsWith('en-US'); });
-  if (v) u.voice = v;
+  u.lang = config.lang;
+  u.rate = config.rate;
+  var voice = findBestVoice(config.lang, config.gender);
+  if (voice) u.voice = voice;
   window.speechSynthesis.speak(u);
 }
 

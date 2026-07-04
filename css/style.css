@@ -229,6 +229,16 @@ body {
   font-weight: 600;
 }
 
+.voice-toggle {
+  font-weight: 600;
+  font-size: 12px;
+  min-width: 64px;
+}
+
+.voice-label {
+  font-size: 11px;
+}
+
 /* Reading highlight: glow on current paragraph */
 .en-para.reading {
   background: rgba(59,130,246,0.06);
