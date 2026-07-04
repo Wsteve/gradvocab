@@ -223,9 +223,6 @@ function renderArticle(index) {
   `;
   document.querySelector('.reader-word-count').textContent = `📖 ${articleWords.length} 个核心单词`;
 
-  // Render slideshow
-  renderSlideshow(index);
-
   // Update back button to show article selector
   var backBtn = document.querySelector('.back-btn');
   if (backBtn) {

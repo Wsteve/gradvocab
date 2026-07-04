@@ -551,6 +551,7 @@ body {
    ==================================================== */
 
 .slideshow-container {
+  display: none;  /* removed per user request */
   position: relative;
   width: 100%;
   margin-bottom: 28px;
