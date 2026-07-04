@@ -164,11 +164,28 @@ function renderArticle(index) {
   // Render slideshow
   renderSlideshow(index);
 
-  // Content
+  // Content - bilingual layout
   const contentDiv = document.querySelector('.reader-content');
-  contentDiv.innerHTML = article.paragraphs.map(para => {
-    return `<p>${highlightWords(para, articleWords)}</p>`;
+
+  // Column headers
+  var headersHTML = '<div class="reader-column-headers">' +
+    '<div class="col-header">🇬🇧 English</div>' +
+    '<div class="col-header">🇨🇳 中文</div>' +
+    '</div>';
+
+  // Paragraph pairs
+  var paragraphsCN = article.paragraphsCN || [];
+  var pairsHTML = article.paragraphs.map(function(para, i) {
+    var cnText = paragraphsCN[i] || '';
+    // Convert **text** to <strong class="cn-vocab">text</strong>
+    var cnHTML = cnText.replace(/\*\*(.+?)\*\*/g, '<strong class="cn-vocab">$1</strong>');
+    return '<div class="para-pair">' +
+      '<p class="en-para">' + highlightWords(para, articleWords) + '</p>' +
+      '<p class="cn-para">' + cnHTML + '</p>' +
+      '</div>';
   }).join('');
+
+  contentDiv.innerHTML = headersHTML + pairsHTML;
 
   // Latin poetry section
   renderLatinPoem(index);

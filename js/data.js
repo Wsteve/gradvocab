@@ -225,6 +225,11 @@ const ARTICLES = [
       "Take LeBron James, for example. His **genome** contains a specific **sequence** of DNA that helps explain his extraordinary physique. Scientists have studied the **chromosome** structure of elite athletes and found certain **mutations** that give them an edge. These **variations** in the human **species** help explain why some players can jump higher or run faster.",
       "But **evolution** doesn't stop. The human body continues to **evolve** and **replicate** its best qualities. Coaches now understand that while genetics provides the foundation, training can unlock the full **hereditary** potential in every player. The combination of natural talent and hard work is what creates basketball legends."
     ],
+    paragraphsCN: [
+      "多年来，科学家们提出了一个大胆的**假设**：运动天赋不仅仅关乎努力训练——它还藏在你的**基因**里。这个想法引发了对人类**遗传**潜力的一次迷人探索。每个运动员都从父母那里**继承**了一套独特的**特征**，其中一些特征是**显性的**——也就是说无论如何都会表现出来。",
+      "以勒布朗·詹姆斯为例。他的**基因组**中包含了一段特定的DNA**序列**，这有助于解释他超凡的体格。科学家们研究了精英运动员的**染色体**结构，发现了某些让他们占据优势的**突变**。人类**物种**中的这些**变异**，有助于解释为什么有些球员跳得更高、跑得更快。",
+      "但**进化**从未停止。人体持续变化并**复制**其最优品质。教练们如今明白，虽然基因提供了基础，但训练能够释放每个球员全部的**遗传**潜力。天赋与勤奋的结合，才是造就篮球传奇的关键。"
+    ],
     wordRange: { start: 0, end: 14 },
     scienceLabel: "🔬 基因科学",
     sportsLabel: "🏀 篮球天赋",
@@ -262,6 +267,11 @@ const ARTICLES = [
       "In astrophysics, a black hole is a region where **gravity** is so strong that nothing can escape. It forms when a massive star begins to **collapse** under its own weight, becoming incredibly **dense**. The **density** reaches such extreme levels that space and time **contract** into a single point of **infinite** **dimension**.",
       "Now imagine that as a basketball defender. A great defender doesn't just guard one player — they **absorb** all offensive movement, **emit** constant pressure, and control every **orbit** on the court. Like a **cosmic** **phenomenon**, their presence changes the game. Players moving at high **velocity** toward the basket suddenly find themselves trapped.",
       "The defensive **radiation** spreads across the entire court, affecting every opponent. When a defender learns to **expand** their coverage area while maintaining perfect positioning, they become a true \"defensive black hole.\" This is the science of lockdown defense — a **phenomenon** that every championship team needs."
+    ],
+    paragraphsCN: [
+      "在天体物理学中，黑洞是一个**引力**极强的区域，没有任何东西能够逃脱。它形成于一颗大质量恒星在自身重量下开始**坍塌**，变得极其**密集**。**密度**达到如此极端的水平，以至于空间和时间**收缩**成一个具有**无限****维度**的奇点。",
+      "现在把它想象成一名篮球防守者。一名优秀的防守者不仅仅盯防一个球员——他们**吸收**所有的进攻移动，**发出**持续的压力，并控制着球场上的每一条**轨道**。就像一种**宇宙****现象**，他们的存在改变了比赛。以高**速度**冲向篮筐的球员会突然发现自己被牢牢困住。",
+      "防守的**辐射**遍布整个球场，影响着每一个对手。当一名防守者学会**扩展**自己的覆盖范围同时保持完美站位时，他们就成为了真正的「防守黑洞」。这就是封锁式防守的科学——一个每个冠军球队都需要的**现象**。"
     ],
     wordRange: { start: 15, end: 29 },
     scienceLabel: "🌌 天体物理",
@@ -301,6 +311,11 @@ const ARTICLES = [
       "This is **cognitive** science in action. A player's **perception** of the game is shaped by years of practice. When a defender approaches, the brain sends an **impulse** through the **motor** system, triggering a **reflex** pass or a quick **response**. The **stimulus** of movement on the court is processed in milliseconds.",
       "What separates great players from good ones is **plasticity** — the brain's ability to rewire itself. Through constant training, the **integration** of visual data and motor skills becomes seamless. The two **hemispheres** of the brain **coordinate** perfectly, allowing the player to see passes that others simply cannot."
     ],
+    paragraphsCN: [
+      "每当一名控球后卫传出一球，他们大脑中就有数千个**神经元**在放电。这些**神经**信号以闪电般的速度穿过**突触**——脑细胞之间的微小间隙。**皮层**，尤其是视觉**半球**，处理来自眼睛和耳朵的**感觉**信息，创建出一张实时的球场地图。",
+      "这就是实践中的**认知**科学。球员对比赛的**感知**是由多年的训练塑造的。当防守者逼近时，大脑会通过**运动**系统发送一个**脉冲**，触发一个**反射**传球或快速**反应**。球场上移动的**刺激**在毫秒之间被处理完成。",
+      "将伟大球员与优秀球员区分开来的是**可塑性**——大脑自我重塑的能力。通过持续的训练，视觉数据与运动技能的**整合**变得无缝衔接。大脑的两个**半球**完美**协调**，让球员能够看到别人根本无法看到的传球路线。"
+    ],
     wordRange: { start: 30, end: 44 },
     scienceLabel: "🧠 神经科学",
     sportsLabel: "🏀 球场智慧",
@@ -338,6 +353,11 @@ const ARTICLES = [
       "Modern basketball arenas are undergoing a remarkable transformation. The **environmental** impact of sports has become a pressing concern, and teams are racing to reduce their **carbon** **footprint**. From solar panels to water **conservation** systems, the **sustainable** revolution has reached the NBA.",
       "The **ecosystem** of a major sports event involves thousands of people, and **emission** levels can be significant. Teams now use **renewable** energy sources and advanced **recycle** programs. Every **resource** — from electricity to food packaging — is carefully managed. **Pollution** is being reduced through innovative **mitigation** strategies.",
       "**Climate** change demands **adaptation** at every level. Arenas are designed to withstand extreme weather, while **biodiversity** projects around stadiums help restore local environments. The goal is to create a **sustainable** model that other industries can follow. Basketball is proving that sports and **environmental** responsibility can go hand in hand."
+    ],
+    paragraphsCN: [
+      "现代篮球场馆正在经历一场非凡的变革。体育对**环境**的影响已成为一个紧迫的问题，各支球队正在竞相减少他们的**碳****足迹**。从太阳能板到节水**保护**系统，**可持续**的革命已经来到了NBA。",
+      "一场大型体育赛事的**生态系统**涉及成千上万的人，**排放**水平可能相当显著。球队现在使用**可再生**能源和先进的**回收利用**项目。每一种**资源**——从电力到食品包装——都经过了精心管理。通过创新的**缓解**策略，**污染**正在被减少。",
+      "**气候**变化要求每个层面都做出**适应**。场馆被设计成能够承受极端天气，而场馆周围的**生物多样性**项目有助于恢复当地环境。目标是创造一个**可持续**的模式，让其他行业可以效仿。篮球正在证明，体育与**环境**责任可以并行不悖。"
     ],
     wordRange: { start: 45, end: 59 },
     scienceLabel: "🌍 环境科学",
@@ -377,6 +397,11 @@ const ARTICLES = [
       "Sports **statistics** have evolved into a sophisticated science. **Variance** in shooting percentages can be explained by **distribution** of shot locations and **correlation** with defensive pressure. **Regression** models help **calibrate** training programs for maximum effectiveness. Every **parameter** — from release angle to arc height — can be measured and optimized.",
       "Modern trainers use these insights to help players **analyze** their own shooting mechanics. By understanding the **statistics** behind each shot, players can make smarter decisions on the court. The combination of **quantum** thinking and data **precision** is creating a new generation of shooters who shoot not just with instinct, but with science."
     ],
+    paragraphsCN: [
+      "**量子**物理学的哲学告诉我们，**观察**的行为会改变结果。在篮球中，每一次投篮都是一个**概率**的**粒子**——要么进，要么不进。但通过精心的**测量**和**分析**，我们可以以出色的**精度**来**预测**成功率。",
+      "体育**统计**已经演变成一门精密的科学。投篮命中率的**方差**可以通过投篮位置的**分布**以及与防守压力的**相关性**来解释。**回归**模型帮助**校准**训练计划以达到最大效果。每一个**参数**——从出手角度到弧线高度——都可以被测量和优化。",
+      "现代训练师利用这些洞察帮助球员**分析**自己的投篮机制。通过理解每一次投篮背后的**统计**数据，球员可以在球场上做出更聪明的决策。**量子**思维与数据**精度**的结合，正在创造出一代不仅凭直觉、更凭科学投篮的新射手。"
+    ],
     wordRange: { start: 60, end: 74 },
     scienceLabel: "🔬 物理学",
     sportsLabel: "🏀 数据分析",
@@ -414,6 +439,11 @@ const ARTICLES = [
       "Charles Darwin's theory of **evolution** by natural **selection** applies perfectly to basketball. Players who cannot **adapt** to new playing styles face a **survival** challenge in the league. The **mechanism** of basketball **evolution** has transformed the game across **generations** — from big, slow centers to fast, versatile athletes.",
       "The modern game requires players to **diversify** their skills. A big man must now shoot threes; a guard must defend multiple positions. This is **adaptive** behavior at its finest. Players **evolve** their games to **thrive** in new systems. What was once considered a **mutation** in playing style is now the new standard.",
       "Coaches **reproduce** successful systems and pass them to the next **generation** of players. While some skills are **innate**, most can be developed through practice. The **offspring** of basketball ideas — new plays, new strategies — create new **habitats** where different types of players can succeed. Every player finds their **niche** in the evolving ecosystem of the game."
+    ],
+    paragraphsCN: [
+      "达尔文的自然选择驱动的**进化**论完美适用于篮球运动。无法**适应**新打法的球员将在联盟中面临**生存**挑战。篮球**进化**的**机制**跨越一代又一代人改变了这项运动——从高大笨重的中锋转变为快速全能的全能战士。",
+      "现代比赛要求球员将自身技能**多样化**。大个子如今必须投三分；后卫必须防守多个位置。这就是最极致的**适应**行为。球员为在新体系中**茁壮成长**而**进化**自己的比赛风格。曾被视为打法**突变**的东西，如今成了新标准。",
+      "教练们**复制**成功的体系并将其传递给下一代球员。虽然有些技能是**天生的**，但大多数可以通过后天训练培养。篮球思想的**后代**——新战术、新策略——创造出全新的**栖息地**，让不同类型的球员都能获得成功。每位球员都在比赛不断演变的生态系统中找到属于自己的**生态位**。"
     ],
     wordRange: { start: 75, end: 89 },
     scienceLabel: "🧬 进化论",
@@ -453,6 +483,11 @@ const ARTICLES = [
       "A basketball team works the same way. Point guards operate in the shallows, seeing the entire **circulation** of the game. Big men **migrate** through the paint like deep-sea **currents**. The **tide** of the game shifts constantly, and each player must understand their **zone** on the court. **Sediment** builds up over time — habits, chemistry, trust.",
       "The most successful teams are like healthy **marine** ecosystems: diverse, balanced, and deeply interconnected. Every **organism** on the team has a role, and the strongest **symbiotic** relationships create winning basketball. Understanding team **dynamics** is like exploring the ocean — you need to appreciate every layer."
     ],
+    paragraphsCN: [
+      "**海洋**世界被划分为不同的**区域**，每个区域都有其独特的**压力**和**深度**。在浅水层，阳光穿透**珊瑚**礁，物种间的**共生**关系创造出丰富的生物多样性。下降到午夜区域，便坠入**深渊**——一个充满极端压力与永恒黑暗的世界。",
+      "一支篮球队的运作方式如出一辙。控球后卫在浅水区活动，统观比赛的全局**循环**。内线大个子像深海**水流**一般在禁区中**迁徙**游弋。比赛的**潮汐**瞬息万变，每位球员都必须理解自己在球场上的**区域**。**沉积物**随时间日积月累——习惯、默契、信任。",
+      "最成功的球队宛如健康的**海洋**生态系统：多元、平衡、深度互联。球队中的每个生物体都有其不可替代的角色，而最强的**共生**关系铸就了胜利篮球。理解团队动力学就如同探索海洋——你需要欣赏每一个层次。"
+    ],
     wordRange: { start: 90, end: 104 },
     scienceLabel: "🌊 海洋学",
     sportsLabel: "🏀 团队协作",
@@ -490,6 +525,11 @@ const ARTICLES = [
       "Just as a **virus** invades a host, adversity can attack a team. An **infection** of losing habits or a **pathogen** of conflict can spread quickly through a locker room. But great teams build **immunity** — a collective **resistance** to negative influences. The **immune** system of a championship team is remarkably strong.",
       "When a star player suffers a **chronic** injury, the entire team must adapt. Doctors **diagnose** the problem, prescribe **therapy**, and develop a recovery plan. **Antibodies** in medicine are like a team's defensive schemes — they recognize threats and neutralize them. A **vaccine** against future setbacks comes from experience and preparation.",
       "The greatest comebacks in basketball history are like fighting an **epidemic** of doubt. Teams **recover** through systematic effort, strengthening their **cellular** structure — every player, every coach, every staff member. An **outbreak** of confidence can spread just as fast as one of negativity. The lesson: build your **immunity** before you need it."
+    ],
+    paragraphsCN: [
+      "正如**病毒**入侵宿主，逆境同样会攻击一支球队。失败习惯的**感染**或内部冲突的**病原体**能在更衣室里迅速蔓延。但伟大的球队会建立起**免疫力**——一种对负面影响的集体**抵抗力**。冠军球队的**免疫**系统异常强大。",
+      "当一名球星遭遇**慢性**伤病，整支球队都必须调整适应。医生**诊断**问题，开具**治疗**方案，制定康复计划。医学中的**抗体**就好比球队的防守体系——它们识别威胁并将其中和。对抗未来挫折的**疫苗**，来自于经验与充分准备。",
+      "篮球史上最伟大的逆转，犹如对抗一场弥漫全队的怀疑**流行病**。球队通过系统性的努力一步步**恢复**，不断强化自身的细胞结构——每一名球员、每一位教练、每一个工作人员。信心的**爆发**可以和消极情绪一样迅速蔓延。启示只有一条：在你需要它之前，先建立起你的**免疫力**。"
     ],
     wordRange: { start: 105, end: 119 },
     scienceLabel: "🦠 病毒学",
@@ -529,6 +569,11 @@ const ARTICLES = [
       "These AI systems **train** on thousands of game videos, learning to recognize subtle **patterns** in player movement and decision-making. The **recognition** of potential in young athletes has become more **precise** than ever. Teams **simulate** different game scenarios to **optimize** their draft strategies.",
       "The goal is not to replace human judgment but to enhance it. After each **iteration** of analysis, the AI **model** becomes smarter. Coaches can now **predict** a player's development trajectory with unprecedented accuracy. The future of **intelligence** in sports is a partnership between human insight and machine **intelligence**."
     ],
+    paragraphsCN: [
+      "**人工****智能**正在彻底颠覆球队发现人才的方式。**机器**学习**算法**处理海量**数据**，识别出人类球探可能忽略的**模式**。**神经****网络**——模仿人脑构建而成——通过数百个**参数**对球员进行**分类**。",
+      "这些AI系统通过数千段比赛视频进行**训练**，学会捕捉球员动作和决策中那些微妙的**模式**。对年轻运动员潜力的**识别**比以往任何时候都更加精准。球队**模拟**不同的比赛场景以**优化**选秀策略。",
+      "目标不是取代人类判断，而是增强它。经过每一次分析的**迭代**，AI**模型**都变得更加智能。教练如今可以以前所未有的准确性来**预测**球员的发展轨迹。体育**智能**的未来，是人类洞察力与机器**智能**的合作共赢。"
+    ],
     wordRange: { start: 120, end: 134 },
     scienceLabel: "🤖 人工智能",
     sportsLabel: "🏀 球探技术",
@@ -566,6 +611,11 @@ const ARTICLES = [
       "The **psychology** of peak **performance** reveals a fascinating state called \"flow.\" When a player enters this state of heightened **consciousness**, everything feels effortless. **Focus** becomes absolute, **emotion** is channeled into positive energy, and **motivation** reaches its highest level. This is where champions are made.",
       "**Resilience** is the foundation of a championship **mindset**. Players with strong mental **discipline** can overcome **anxiety** and self-doubt. They **visualize** success before it happens, building unshakeable **confidence**. The ability to **achieve** greatness under pressure separates legends from average players.",
       "To reach your **peak**, you must believe in your **potential** and work systematically toward your goals. **Psychology** teaches us that the mind is the most powerful muscle in an athlete's body. With the right **mindset**, anything is **achievable**. The science of **motivation** reminds us: greatness is not a gift — it is a choice."
+    ],
+    paragraphsCN: [
+      "巅峰**表现**的**心理学**揭示了一种令人着迷的状态，名为“心流”。当球员进入这种高度**意识**状态时，一切都变得毫不费力。**专注**变得绝对，**情绪**被引导为正向能量，**动机**攀升至最高水平。这就是冠军诞生的地方。",
+      "**韧性**是冠军**心态**的基石。拥有强大心理**纪律**的球员能够克服**焦虑**与自我怀疑。他们在成功到来之前就在心中**想象**它，从而建立起不可动摇的**自信**。在重压之下仍能**实现**伟大的能力，正是传奇与普通球员的分水岭。",
+      "要抵达你的**巅峰**，就必须相信自身的**潜力**，并系统性地朝着目标迈进。**心理学**告诉我们，大脑是运动员身体中最强大的肌肉。拥有正确的**心态**，一切皆**可实现**。**动机**科学提醒我们：伟大不是一种天赋——而是一种选择。"
     ],
     wordRange: { start: 135, end: 149 },
     scienceLabel: "🧠 心理学",

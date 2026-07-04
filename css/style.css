@@ -147,13 +147,108 @@ body {
 .reader-labels { display: flex; gap: 8px; flex-shrink: 0; }
 .reader-word-count { font-size: 13px; color: var(--text-muted); margin-top: 12px; }
 
+/* ====================================================
+   Bilingual Reader: English (Left) | Chinese (Right)
+   ==================================================== */
+
 .reader-content {
-  background: var(--bg-card); border: 1px solid var(--border-color);
-  border-radius: var(--radius); padding: 32px 36px; line-height: 2;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 0;
+  line-height: 2;
+  overflow: hidden;
 }
 
-.reader-content p { margin-bottom: 20px; font-size: 16px; color: var(--text-primary); font-family: var(--font-serif); }
-.reader-content p:last-child { margin-bottom: 0; }
+/* Header row */
+.reader-column-headers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--bg-secondary);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.col-header {
+  padding: 10px 24px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.col-header:first-child {
+  border-right: 1px solid var(--border-color);
+  color: var(--accent-blue);
+}
+
+.col-header:last-child {
+  color: var(--accent-green);
+}
+
+/* Each paragraph pair is a row */
+.para-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.para-pair:not(:last-child) {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.en-para, .cn-para {
+  padding: 20px 24px;
+  margin: 0;
+  font-size: 16px;
+  line-height: 2;
+  color: var(--text-primary);
+  font-family: var(--font-serif);
+}
+
+.en-para {
+  border-right: 1px solid var(--border-color);
+}
+
+.cn-para {
+  background: rgba(52, 211, 153, 0.03);
+}
+
+/* Chinese vocabulary highlight */
+.cn-vocab {
+  color: var(--accent-green);
+  font-weight: 600;
+  border-bottom: 2px dashed rgba(52, 211, 153, 0.3);
+  cursor: default;
+}
+
+/* Ensure vocab-word still works in English column */
+.en-para .vocab-word {
+  color: var(--accent-amber); font-weight: 600; cursor: pointer;
+  border-bottom: 2px dashed rgba(251,191,36,0.3);
+  transition: var(--transition); position: relative;
+}
+.en-para .vocab-word:hover { color: #fcd34d; border-bottom-color: var(--accent-amber); background: rgba(251,191,36,0.08); border-radius: 2px; }
+.en-para .vocab-word.active { color: var(--accent-cyan); border-bottom-color: var(--accent-cyan); background: rgba(34,211,238,0.1); border-radius: 2px; }
+
+/* Responsive: stack on mobile */
+@media (max-width: 768px) {
+  .reader-column-headers { display: none; }
+  .para-pair { grid-template-columns: 1fr; }
+  .en-para {
+    border-right: none;
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: 12px;
+  }
+  .cn-para {
+    padding-top: 12px;
+    background: rgba(52, 211, 153, 0.02);
+  }
+  .en-para, .cn-para { font-size: 15px; padding: 16px; }
+}
+
+/* Remove old single-column reader styles */
+.reader-content > p { display: none; }
 
 .vocab-word {
   color: var(--accent-amber); font-weight: 600; cursor: pointer;
