@@ -334,7 +334,40 @@ function highlightCNMatch(enElement) {
   }
 }
 
-// Show word info in upper-right sidebar panel
+// Word → emoji mapping based on meaning
+var WORD_EMOJI = {
+  hypothesis: '💡', gene: '🧬', inherit: '👨‍👦', dominant: '👑', mutation: '🦎',
+  evolution: '🔄', trait: '🏷️', chromosome: '🧶', replicate: '📋', sequence: '🔗',
+  genetic: '🧬', variation: '🎨', species: '🐾', genome: '📜', hereditary: '🏰',
+  gravity: '🌍', collapse: '💥', dense: '🪨', infinite: '♾️', dimension: '📐',
+  emit: '📡', radiation: '☢️', absorb: '🧽', cosmic: '🌌', phenomenon: '✨',
+  velocity: '💨', orbit: '💫', density: '⚖️', contract: '📉', expand: '📈',
+  neuron: '🧠', synapse: '⚡', cortex: '🧠', cognitive: '🤔', perception: '👁️',
+  stimulus: '🔔', response: '↩️', reflex: '🦵', plasticity: '🧘', hemisphere: '🌓',
+  coordinate: '🎯', impulse: '💥', sensory: '👂', motor: '🏃', integration: '🧩',
+  sustainable: '🌱', ecosystem: '🌳', emission: '💨', carbon: '🖤', renewable: '☀️',
+  conservation: '🛡️', biodiversity: '🦋', pollution: '🏭', climate: '🌡️', adaptation: '🦎',
+  mitigation: '🩹', resource: '💎', recycle: '♻️', environmental: '🌍', footprint: '👣',
+  quantum: '⚛️', particle: '🔵', measurement: '📏', probability: '🎲', observe: '🔬',
+  predict: '🔮', analyze: '🔍', statistic: '📊', variance: '📈', distribution: '📦',
+  correlation: '🔗', regression: '↩️', parameter: '🎛️', precision: '🎯', calibrate: '⚙️',
+  adapt: '🦎', survival: '🏕️', generation: '👶', mutate: '🧬', diversify: '🌈',
+  organism: '🦠', reproduce: '🐣', adaptive: '🔧', innate: '🧬', offspring: '🐤',
+  mechanism: '⚙️', evolve: '📈', thrive: '🌺', habitat: '🏠', niche: '🧩',
+  marine: '🌊', depth: '📏', pressure: '🏋️', current: '🌊', tide: '🌊',
+  sediment: '🪨', coral: '🪸', migrate: '🦅', symbiotic: '🤝', trench: '🕳️',
+  zone: '🗺️', abyss: '🌑', circulation: '🔄', stratum: '📚', oceanic: '🌊',
+  virus: '🦠', immune: '🛡️', infection: '🦠', antibody: '💉', vaccine: '💉',
+  pathogen: '🦠', epidemic: '📈', resistance: '🏋️', recover: '🏥', immunity: '🛡️',
+  cellular: '🔬', outbreak: '💥', diagnose: '🩺', therapy: '💊', chronic: '⏳',
+  algorithm: '🤖', artificial: '🏗️', intelligence: '🧠', pattern: '🔍', recognition: '👁️',
+  data: '📊', machine: '⚙️', neural: '🧠', network: '🕸️', classify: '🏷️',
+  optimize: '⚡', train: '🏋️', model: '🗿', simulate: '🎮', iteration: '🔁',
+  psychology: '🧠', consciousness: '💭', focus: '🎯', emotion: '😊', motivation: '🔥',
+  resilience: '💪', discipline: '⚔️', visualize: '🎨', mindset: '🧠', anxiety: '😰',
+  confidence: '🦁', peak: '⛰️', performance: '🏆', achieve: '🥇', potential: '🌱'
+};
+
 function showWordSidebar(wordIndex) {
   var sidebar = document.getElementById('word-sidebar');
   if (!sidebar) return;
@@ -342,47 +375,80 @@ function showWordSidebar(wordIndex) {
   var word = WORDS[wordIndex];
   var ety = typeof ETYMOLOGY !== 'undefined' ? ETYMOLOGY[word.word] : null;
 
-  // Populate sidebar
-  sidebar.querySelector('.sidebar-word').textContent = word.word;
-  sidebar.querySelector('.sidebar-phonetic').textContent = word.phonetic;
-  sidebar.querySelector('.sidebar-meaning').textContent = word.meaning;
+  // ── Top: Emoji + Word + Ancient Origin ──
+  sidebar.querySelector('.sb-emoji').textContent = WORD_EMOJI[word.word] || '📖';
+  sidebar.querySelector('.sb-word').textContent = word.word;
+  sidebar.querySelector('.sb-phonetic').textContent = word.phonetic;
+  sidebar.querySelector('.sb-origin').textContent = ety
+    ? (ety.origin || '') + (ety.story ? ' — ' + ety.story.substring(0, 80) : '')
+    : '';
 
-  // Syllable chips
-  var sylContainer = sidebar.querySelector('.sidebar-syllables');
+  // ── Middle: Root Breakdown ──
+  var rootsContainer = sidebar.querySelector('.sb-roots');
   if (ety && ety.parts) {
-    sylContainer.innerHTML = ety.parts.map(function(p) {
-      return '<div class="sidebar-syl-chip" data-syl="' + p.syl.replace(/"/g, '&quot;') + '">' +
-        '<span class="syl-text">' + p.syl + '</span>' +
-        '<span class="syl-ipa">' + (p.ipa || '') + '</span>' +
-        '<span class="syl-speak-icon">🔊</span>' +
+    rootsContainer.innerHTML = ety.parts.map(function(p) {
+      var langClass = (p.lang || '').indexOf('希腊') >= 0 ? 'greek'
+        : (p.lang || '').indexOf('法') >= 0 ? 'french'
+        : (p.lang || '').indexOf('英') >= 0 ? 'eng'
+        : 'latin';
+      var langShort = (p.lang || '').indexOf('希腊') >= 0 ? '希'
+        : (p.lang || '').indexOf('法') >= 0 ? '法'
+        : (p.lang || '').indexOf('英') >= 0 ? '英'
+        : '拉';
+      return '<div class="sb-root-card" data-syl="' + p.syl.replace(/"/g, '&quot;') + '">' +
+        '<div class="sb-root-syl">' + p.syl + '</div>' +
+        '<div class="sb-root-ipa">' + (p.ipa || '') + '</div>' +
+        '<span class="sb-root-lang ' + langClass + '">' + langShort + '</span>' +
+        '<div class="sb-root-note">' + (p.note ? p.note.substring(0, 30) : '') + '</div>' +
+        '<div class="sb-root-speak">🔊</div>' +
         '</div>';
     }).join('');
 
-    // Add click handlers for syllable chips
     setTimeout(function() {
-      sylContainer.querySelectorAll('.sidebar-syl-chip').forEach(function(chip) {
-        chip.addEventListener('click', function(e) {
+      rootsContainer.querySelectorAll('.sb-root-card').forEach(function(card) {
+        card.addEventListener('click', function(e) {
           e.stopPropagation();
           var syl = this.dataset.syl;
           var cleanSyl = syl.replace(/[·\-]/g, '').trim();
           if (cleanSyl) speakWord(cleanSyl);
-          // Also show multi-language popup
           var partData = ety.parts.find(function(p) { return p.syl === syl; });
-          showSylPopup(this.querySelector('.syl-text'), syl, partData);
+          showSylPopup(this, syl, partData);
         });
       });
     }, 30);
   } else {
-    sylContainer.innerHTML = '<div style="font-size:12px;color:var(--text-muted)">' + word.syllables + '</div>';
+    rootsContainer.innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:4px 16px">' +
+      word.syllables.split('·').map(function(s) {
+        return '<span style="display:inline-block;margin:2px 4px;padding:2px 8px;background:var(--bg-hover);border-radius:4px;color:var(--accent-amber);font-weight:600">' + s + '</span>';
+      }).join('') + '</div>';
   }
 
-  // Prepare speak button
+  // ── Bottom: Phrases ──
+  var phrasesContainer = sidebar.querySelector('.sb-phrases');
+  var phrases = (ety && ety.phrases) ? ety.phrases : [];
+  if (phrases.length > 0) {
+    phrasesContainer.innerHTML = phrases.map(function(p) {
+      return '<div class="sb-phrase-item">' +
+        '<div class="sb-phrase-en">' + p.en.replace(new RegExp('\\b' + word.word + '\\b', 'gi'), '<strong>' + word.word + '</strong>') + '</div>' +
+        '<div class="sb-phrase-zh">' + p.zh + '</div>' +
+        '</div>';
+    }).join('');
+  } else {
+    // Fallback: show the word in a simple sentence context
+    var sentence = findWordSentence(word);
+    phrasesContainer.innerHTML = '<div class="sb-phrase-item">' +
+      '<div class="sb-phrase-en">' + (sentence || word.word) + '</div>' +
+      '<div class="sb-phrase-zh">' + word.meaning + '</div>' +
+      '</div>';
+  }
+
+  // Speak button
   var speakBtn = sidebar.querySelector('.sidebar-speak-all');
   var newSpeak = speakBtn.cloneNode(true);
   speakBtn.parentNode.replaceChild(newSpeak, speakBtn);
   newSpeak.addEventListener('click', function() { speakWord(word.word); });
 
-  // Show sidebar
+  // Show
   sidebar.classList.add('active');
 }
 

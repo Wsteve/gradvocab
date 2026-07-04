@@ -34,13 +34,30 @@
     </div>
   </header>
 
-  <!-- ======== Word Sidebar Panel (右上角) ======== -->
+  <!-- ======== Word Sidebar Panel (右上角三层卡片) ======== -->
   <div class="word-sidebar" id="word-sidebar">
     <button class="sidebar-close">✕</button>
-    <div class="sidebar-word"></div>
-    <div class="sidebar-phonetic"></div>
-    <div class="sidebar-meaning"></div>
-    <div class="sidebar-syllables"></div>
+
+    <!-- Top: Imagery + Ancient Meaning -->
+    <div class="sb-top">
+      <div class="sb-emoji"></div>
+      <div class="sb-word"></div>
+      <div class="sb-phonetic"></div>
+      <div class="sb-origin"></div>
+    </div>
+
+    <!-- Middle: Root Breakdown -->
+    <div class="sb-mid">
+      <div class="sb-section-title">🧩 词根拆解</div>
+      <div class="sb-roots"></div>
+    </div>
+
+    <!-- Bottom: Common Phrases -->
+    <div class="sb-bot">
+      <div class="sb-section-title">📝 常用词组</div>
+      <div class="sb-phrases"></div>
+    </div>
+
     <button class="sidebar-speak-all">🔊 朗读全词</button>
   </div>
 

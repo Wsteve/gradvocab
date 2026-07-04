@@ -38,7 +38,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "古希腊哲学家柏拉图最早使用 hypothesis 一词，字面义为'放在下面的东西'——即论证的基础假设。在拉丁语中拼写为 hypothesis，16世纪进入英语科技文献。"
-  },
+  , "phrases": [{"en": "working hypothesis", "zh": "工作假设"}, {"en": "test a hypothesis", "zh": "检验假设"}, {"en": "null hypothesis", "zh": "零假设（统计学）"}]},
   "gene": {
     "origin": "希腊语 → 德语 → 英语",
     "breakdown": "gen- (出生、产生) + -e",
@@ -59,7 +59,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "gene 由丹麦植物学家 Wilhelm Johannsen 于1909年创造，源于希腊语 genos '出生、种族'。拉丁语中 genus 表示'种类'，法语则演变为 gène。英语发音/dʒiːn/受法语影响。"
-  },
+  , "phrases": [{"en": "gene expression", "zh": "基因表达"}, {"en": "gene therapy", "zh": "基因治疗"}, {"en": "gene pool", "zh": "基因库"}]},
   "inherit": {
     "origin": "拉丁语 in- + heres (继承人)",
     "breakdown": "in- (进入) + her- (继承) + -it (动词后缀)",
@@ -87,7 +87,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "inherit 直接来自古法语 enheriter，最终源于拉丁语 inhereditare '使成为继承人'。拉丁语 heres（继承人）与希腊语 kheros '孤儿'同源，反映了继承权在古代社会的重要性。"
-  },
+  , "phrases": [{"en": "inherit property", "zh": "继承财产"}, {"en": "inherit a tradition", "zh": "继承传统"}, {"en": "inherit from parents", "zh": "从父母遗传"}]},
   "dominant": {
     "origin": "拉丁语 dominus (主人)",
     "breakdown": "domin- (主人) + -ant (形容词后缀)",
@@ -115,7 +115,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "dominant 源自拉丁语 dominari '统治'，与域名 domain、主宰 dominate 同源。拉丁语 dominus '主人'也演变为西班牙语 don、意大利语 donno 等尊称。法语 influence 将其引入英语作为科学术语。"
-  },
+  , "phrases": [{"en": "dominant position", "zh": "主导地位"}, {"en": "dominant gene", "zh": "显性基因"}, {"en": "play a dominant role", "zh": "发挥主导作用"}]},
   "mutation": {
     "origin": "拉丁语 mutare (改变)",
     "breakdown": "mut- (改变) + -ation (名词后缀)",
@@ -143,7 +143,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "mutation 源自拉丁语 mutare '改变'。在罗马法中 mutatio 指'变更'，中世纪末期进入生物学领域。拉丁语 mutare 与英语 mutable '易变的'、mutual '相互的'为同根词。"
-  },
+  , "phrases": [{"en": "genetic mutation", "zh": "基因突变"}, {"en": "spontaneous mutation", "zh": "自发突变"}, {"en": "point mutation", "zh": "点突变"}]},
   "evolution": {
     "origin": "拉丁语 evolvere (展开)",
     "breakdown": "e- (向外) + volv- (卷) + -ution (名词后缀)",
@@ -178,7 +178,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "evolution 字面义为'展开'，如同展开一卷书。拉丁语 evolvere = e- (向外) + volvere (卷)。达尔文1859年《物种起源》中赋予生物学含义。法语 évolution 影响了英语拼写。"
-  },
+  , "phrases": [{"en": "theory of evolution", "zh": "进化论"}, {"en": "cultural evolution", "zh": "文化演变"}, {"en": "evolution of technology", "zh": "技术演进"}]},
   "trait": {
     "origin": "拉丁语 tractus (拉、特征) → 法语",
     "breakdown": "tract- (拉) → trait",
@@ -451,7 +451,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "adapt 源自拉丁语 adaptare = ad- (朝向) + aptare (使适合)。aptare 来自 aptus '适合的'。法语 adapter 是英语的直接来源，拉丁语 aptus 也与梵语 apnoti '到达'同源，体现'到达合适位置'的意象。"
-  },
+  , "phrases": [{"en": "adapt to change", "zh": "适应变化"}, {"en": "adapt a novel", "zh": "改编小说"}, {"en": "quickly adapt", "zh": "快速适应"}]},
   "survival": {
     "origin": "拉丁语 super- (超过) + vivere (活着)",
     "breakdown": "sur- (超过) + viv- (活着) + -al",
@@ -479,7 +479,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "survival 字面义'活得比...更久'。达尔文'适者生存'的短语 survival of the fittest 使这个词成为进化论的核心术语。拉丁语 vivere '活着'与英语 quick '快的'古义'活的'同源。"
-  },
+  , "phrases": [{"en": "survival of the fittest", "zh": "适者生存"}, {"en": "survival rate", "zh": "存活率"}, {"en": "survival instinct", "zh": "求生本能"}]},
   "generation": {
     "origin": "拉丁语 generare (产生)",
     "breakdown": "gen- (产生) + -eration (名词)",
@@ -724,7 +724,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "mechanism 源自希腊语 mekhane '机器'，与 machinery '机械'同源。希腊语 mekhane 也与 might '力量'同源——早期的机械本质上是'力量的放大'。"
-  },
+  , "phrases": [{"en": "defense mechanism", "zh": "防御机制"}, {"en": "coping mechanism", "zh": "应对机制"}, {"en": "underlying mechanism", "zh": "潜在机制"}]},
   "evolve": {
     "origin": "拉丁语 e- (向外) + volvere (卷)",
     "breakdown": "e- (向外) + volv- (卷)",
@@ -745,7 +745,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "evolve 字面义'展开卷起的东西'。达尔文在他的笔记中反复使用 evolved 来结束《物种起源》——最后一句话以'There is grandeur in this view of life... have been and are being evolved'结尾。"
-  },
+  , "phrases": [{"en": "evolve over time", "zh": "随时间演变"}, {"en": "evolve into", "zh": "演变成"}, {"en": "continue to evolve", "zh": "持续进化"}]},
   "thrive": {
     "origin": "古诺尔斯语 thrifask (兴旺)",
     "breakdown": "thriv- (兴旺) + -e",
@@ -759,7 +759,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "thrive 是少数源自古诺尔斯语（维京语言）的核心词汇。维京人 thrifask 意为'抓住机会'→'获得成功'。同源词 thrive 和 thrift 在英语中分别走向了'繁荣'和'节俭'两义。"
-  },
+  , "phrases": [{"en": "thrive on challenge", "zh": "在挑战中茁壮成长"}, {"en": "thrive in adversity", "zh": "在逆境中繁荣"}, {"en": "business thrives", "zh": "生意兴隆"}]},
   "habitat": {
     "origin": "拉丁语 habitare (居住)",
     "breakdown": "habit- (居住) + -at (名词)",
@@ -822,7 +822,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "marine 直接来自拉丁语 mare '海'。mare 与英语 moor '沼泽'、mere '湖'同源——都表示'水域'。法语 influence：法语 marin/ marine 保留了拉丁语的阳性/阴性区别。"
-  },
+  , "phrases": [{"en": "marine life", "zh": "海洋生物"}, {"en": "marine biology", "zh": "海洋生物学"}, {"en": "marine corps", "zh": "海军陆战队"}]},
   "depth": {
     "origin": "古英语 deop (深) + -th (名词)",
     "breakdown": "deep (深) + -th (名词后缀)",
@@ -1137,7 +1137,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "virus 在古拉丁语意为'snake venom 蛇毒'，文艺复兴前泛指'有毒物质'。"
-  },
+  , "phrases": [{"en": "computer virus", "zh": "电脑病毒"}, {"en": "virus outbreak", "zh": "病毒爆发"}, {"en": "go viral", "zh": "病毒式传播"}]},
   "immune": {
     "origin": "拉丁语 in- (不) + munus (义务)",
     "breakdown": "im- (不) + mun- (义务) + -e",
@@ -1158,7 +1158,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "immune 字面义'免于义务的'。古罗马用 immunis 描述'特权阶级'，现代医学术语借用为'免疫'。"
-  },
+  , "phrases": [{"en": "immune system", "zh": "免疫系统"}, {"en": "immune response", "zh": "免疫反应"}, {"en": "immune to criticism", "zh": "不受批评影响"}]},
   "infection": {
     "origin": "拉丁语 in- (进入) + facere (做)",
     "breakdown": "in- (进入) + fect- (做) + -ion",
@@ -1235,7 +1235,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "vaccine 的故事很奇妙: 1796年琴纳发现挤牛奶女工感染牛痘后不患天花。vacca 是拉丁语'母牛'。"
-  },
+  , "phrases": [{"en": "develop a vaccine", "zh": "研发疫苗"}, {"en": "vaccine efficacy", "zh": "疫苗效力"}, {"en": "get vaccinated", "zh": "接种疫苗"}]},
   "pathogen": {
     "origin": "希腊语 pathos (痛苦) + gene (产生)",
     "breakdown": "patho- (病) + gen (产生)",
@@ -1347,7 +1347,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "recover 字面义'重新抓取'→ 恢复健康。同源词: capture、conceive、deceive 都来自拉丁语 capere '抓取'。"
-  },
+  , "phrases": [{"en": "recover from illness", "zh": "康复"}, {"en": "recover losses", "zh": "挽回损失"}, {"en": "recover data", "zh": "恢复数据"}]},
   "immunity": {
     "origin": "拉丁语 in- (不) + munus (义务)",
     "breakdown": "im- (不) + mun- (义务) + -ity",
@@ -1522,7 +1522,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "algorithm 来自9世纪波斯数学家 al-Khwarizmi 的名字。后与希腊语 arithmos (数字)混淆，演变为 algorithm。"
-  },
+  , "phrases": [{"en": "search algorithm", "zh": "搜索算法"}, {"en": "machine learning algorithm", "zh": "机器学习算法"}, {"en": "sorting algorithm", "zh": "排序算法"}]},
   "artificial": {
     "origin": "拉丁语 ars (技艺) + facere (做)",
     "breakdown": "art- (技艺) + -i- + fic- (做) + -ial",
@@ -1557,7 +1557,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "artificial 字面义'用技艺制作的'。Artificial Intelligence 这个短语在1956年达特茅斯会议上正式诞生。"
-  },
+  , "phrases": [{"en": "artificial intelligence", "zh": "人工智能"}, {"en": "artificial light", "zh": "人造光"}, {"en": "artificial flavor", "zh": "人工香精"}]},
   "intelligence": {
     "origin": "拉丁语 intel- (之间) + legere (选择)",
     "breakdown": "intel- (之间) + lig- (选择) + -ence",
@@ -1592,7 +1592,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "intelligence 字面义'在事物间选择的能力'。同源词: lecture、collect、elect 都与 legere '选择'有关。"
-  },
+  , "phrases": [{"en": "emotional intelligence", "zh": "情商"}, {"en": "intelligence agency", "zh": "情报机构"}, {"en": "artificial intelligence", "zh": "人工智能"}]},
   "pattern": {
     "origin": "拉丁语 patronus (保护者)",
     "breakdown": "patr- (父亲) + -on → pattern",
@@ -1613,7 +1613,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "pattern 和 patron 同源: 拉丁语 patronus '保护人' → 法语 patron '样板', 引申为'重复出现的模式'。"
-  },
+  , "phrases": [{"en": "behavior pattern", "zh": "行为模式"}, {"en": "pattern recognition", "zh": "模式识别"}, {"en": "follow a pattern", "zh": "遵循模式"}]},
   "recognition": {
     "origin": "拉丁语 re- (再次) + cognoscere (知道)",
     "breakdown": "re- (再次) + co- (一起) + gnos- (知道)",
@@ -1914,7 +1914,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "psychology 字面义'灵魂的研究'。希腊语 psyche 原意为'呼吸'，与英语 breath 同源。"
-  },
+  , "phrases": [{"en": "social psychology", "zh": "社会心理学"}, {"en": "reverse psychology", "zh": "逆反心理"}, {"en": "clinical psychology", "zh": "临床心理学"}]},
   "consciousness": {
     "origin": "拉丁语 con- (一起) + scire (知道)",
     "breakdown": "con- (一起) + sci- (知道) + -ous + -ness",
@@ -1963,7 +1963,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "focus 拉丁语原意为'壁炉'。从'焦点'(光线汇聚点)到'专注'，经历了漫长的语义演变。法语 foyer (壁炉、家)是同样的意象。"
-  },
+  , "phrases": [{"en": "focus on", "zh": "专注于"}, {"en": "main focus", "zh": "主要焦点"}, {"en": "lose focus", "zh": "失去焦点"}]},
   "emotion": {
     "origin": "拉丁语 e- (向外) + movere (移动)",
     "breakdown": "e- (向外) + mot- (移动) + -ion",
@@ -2026,7 +2026,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "motivation 与 emotion 共享 movere '移动'。动机是'推动行动的内在力量'，就是'推动自己去行动'。"
-  },
+  , "phrases": [{"en": "intrinsic motivation", "zh": "内在动机"}, {"en": "lack of motivation", "zh": "缺乏动力"}, {"en": "source of motivation", "zh": "动力来源"}]},
   "resilience": {
     "origin": "拉丁语 re- (向后) + salire (跳)",
     "breakdown": "re- (向后) + sili- (跳) + -ence",
@@ -2054,7 +2054,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "resilience 字面义'向后弹跳'。物理上描述材料恢复原状的能力，心理学描述人从逆境中'反弹'——像弹簧一样。"
-  },
+  , "phrases": [{"en": "mental resilience", "zh": "心理韧性"}, {"en": "build resilience", "zh": "培养韧性"}, {"en": "show resilience", "zh": "表现出韧性"}]},
   "discipline": {
     "origin": "拉丁语 discipulus (学生)",
     "breakdown": "discip- (学习) + -line (名词)",
@@ -2082,7 +2082,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "discipline 原指'学习的领域'。'纪律'来自'学生需遵守的规则'。同源词: disciple '门徒' (学习者)。"
-  },
+  , "phrases": [{"en": "self-discipline", "zh": "自律"}, {"en": "academic discipline", "zh": "学科"}, {"en": "strict discipline", "zh": "严格纪律"}]},
   "visualize": {
     "origin": "拉丁语 videre (看见)",
     "breakdown": "vis- (看见) + -u- + -al- + -ize",
@@ -2187,7 +2187,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "confidence 字面义'完全的信任'。同源词: fidelity (忠诚)、fiduciary (受托人)、confide (倾诉信任)。"
-  },
+  , "phrases": [{"en": "self-confidence", "zh": "自信"}, {"en": "gain confidence", "zh": "获得信心"}, {"en": "vote of confidence", "zh": "信任投票"}]},
   "peak": {
     "origin": "凯尔特→英语",
     "breakdown": "peak (尖峰)",
@@ -2229,7 +2229,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "performance 字面义'彻底完成形式的行动'。舞台表演和体育表现共享同一词汇——都要求完美的形式呈现。"
-  },
+  , "phrases": [{"en": "high performance", "zh": "高性能"}, {"en": "performance review", "zh": "绩效评估"}, {"en": "live performance", "zh": "现场表演"}]},
   "achieve": {
     "origin": "古法语 a- (朝向) + chief (头)",
     "breakdown": "a- (朝向) + chiev- (头→完成)",
@@ -2250,7 +2250,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "achieve 来自拉丁语 caput '头'。古法语 achever '完成'的本义是'到达头部(终点)'。同源词: chief、captain、capital。"
-  },
+  , "phrases": [{"en": "achieve a goal", "zh": "实现目标"}, {"en": "achieve success", "zh": "取得成功"}, {"en": "achieve excellence", "zh": "达到卓越"}]},
   "potential": {
     "origin": "拉丁语 potentia (力量)",
     "breakdown": "pot- (力量) + -ent + -ial",
@@ -2278,7 +2278,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "potential 字面义'力量的状态'。拉丁语 posse '能够'也是 power 的词源。同源词: possible (能够是)、posse (有力量的一群人)。"
-  },
+  , "phrases": [{"en": "full potential", "zh": "全部潜力"}, {"en": "potential risk", "zh": "潜在风险"}, {"en": "reach one's potential", "zh": "发挥潜力"}]},
   "gravity": {
     "origin": "拉丁语 gravis",
     "breakdown": "grav- + -ity",
@@ -2306,7 +2306,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "牛顿用拉丁语 gravitas 命名万有引力。"
-  },
+  , "phrases": [{"en": "center of gravity", "zh": "重心"}, {"en": "force of gravity", "zh": "重力"}, {"en": "specific gravity", "zh": "比重"}]},
   "collapse": {
     "origin": "拉丁语 collabi",
     "breakdown": "col- + laps- + e",
@@ -2327,7 +2327,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "collapse = col- (一起) + labi (滑倒)→'一起倒下'。"
-  },
+  , "phrases": [{"en": "economic collapse", "zh": "经济崩溃"}, {"en": "building collapse", "zh": "建筑倒塌"}, {"en": "collapse under pressure", "zh": "在压力下崩溃"}]},
   "dense": {
     "origin": "拉丁语 densus",
     "breakdown": "densus",
@@ -2341,7 +2341,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "与希腊语 dasys '稠密的'同源。"
-  },
+  , "phrases": [{"en": "dense population", "zh": "人口密集"}, {"en": "dense forest", "zh": "茂密森林"}, {"en": "dense fog", "zh": "浓雾"}]},
   "infinite": {
     "origin": "拉丁语 in- + finis",
     "breakdown": "in- + fin- + -ite",
@@ -2369,7 +2369,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "中世纪末经院哲学才精确表达'无限'概念。"
-  },
+  , "phrases": [{"en": "infinite possibilities", "zh": "无限可能"}, {"en": "infinite patience", "zh": "无限的耐心"}, {"en": "to infinity", "zh": "直至无穷"}]},
   "dimension": {
     "origin": "拉丁语 dimensio",
     "breakdown": "di- + mens- + -ion",
@@ -2397,7 +2397,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "同源词: measure, meter, metric。"
-  },
+  , "phrases": [{"en": "new dimension", "zh": "新维度"}, {"en": "spatial dimension", "zh": "空间维度"}, {"en": "add a dimension", "zh": "增添一个方面"}]},
   "emit": {
     "origin": "拉丁语 e- + mittere",
     "breakdown": "e- + mit-",
@@ -2649,7 +2649,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "希腊语原意为'筋腱'。希波克拉底学派用来描述'神经'。"
-  },
+  , "phrases": [{"en": "motor neuron", "zh": "运动神经元"}, {"en": "neuron network", "zh": "神经元网络"}, {"en": "mirror neuron", "zh": "镜像神经元"}]},
   "synapse": {
     "origin": "希腊语 syn- + haptein",
     "breakdown": "syn- + hapt- + e",
@@ -2719,7 +2719,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "同根: recognize (认出), ignore (不知道), diagnosis (诊断)。"
-  },
+  , "phrases": [{"en": "cognitive ability", "zh": "认知能力"}, {"en": "cognitive science", "zh": "认知科学"}, {"en": "cognitive bias", "zh": "认知偏见"}]},
   "perception": {
     "origin": "拉丁语 per- + capere",
     "breakdown": "per- + cept- + -ion",
@@ -2740,7 +2740,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "字面义'通过感官抓取'。capere 是英语最高产词根之一。"
-  },
+  , "phrases": [{"en": "public perception", "zh": "公众认知"}, {"en": "visual perception", "zh": "视觉感知"}, {"en": "depth perception", "zh": "深度知觉"}]},
   "stimulus": {
     "origin": "拉丁语 stimulus",
     "breakdown": "stimul- + -us",
@@ -3027,7 +3027,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "字面义'能维持的'。同源: contain, maintain, retain。"
-  },
+  , "phrases": [{"en": "sustainable development", "zh": "可持续发展"}, {"en": "sustainable energy", "zh": "可持续能源"}, {"en": "sustainable growth", "zh": "可持续增长"}]},
   "ecosystem": {
     "origin": "希腊语 oikos + system",
     "breakdown": "eco- + system",
@@ -3055,7 +3055,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "1935年创造的新词: oikos (家) + system (系统)。同源: economy, ecology。"
-  },
+  , "phrases": [{"en": "marine ecosystem", "zh": "海洋生态系统"}, {"en": "tech ecosystem", "zh": "科技生态系统"}, {"en": "fragile ecosystem", "zh": "脆弱的生态系统"}]},
   "emission": {
     "origin": "拉丁语 e- + mittere",
     "breakdown": "e- + miss- + -ion",
@@ -3083,7 +3083,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "同根: mission, missile, message 都与'发送'有关。"
-  },
+  , "phrases": [{"en": "carbon emission", "zh": "碳排放"}, {"en": "zero emission", "zh": "零排放"}, {"en": "greenhouse gas emission", "zh": "温室气体排放"}]},
   "carbon": {
     "origin": "拉丁语 carbo",
     "breakdown": "carb- + -on",
@@ -3104,7 +3104,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "元素命名中最古老的之一，反映人类对炭的远古认知。"
-  },
+  , "phrases": [{"en": "carbon dioxide", "zh": "二氧化碳"}, {"en": "carbon footprint", "zh": "碳足迹"}, {"en": "carbon neutral", "zh": "碳中和"}]},
   "renewable": {
     "origin": "拉丁语 re- + novus / 英语 new",
     "breakdown": "re- + new + -able",
@@ -3132,7 +3132,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "日耳曼-拉丁混合词: re- (拉丁) + new (日耳曼) + -able (拉丁)。"
-  },
+  , "phrases": [{"en": "renewable energy", "zh": "可再生能源"}, {"en": "renewable resources", "zh": "可再生资源"}, {"en": "renewable power", "zh": "可再生电力"}]},
   "conservation": {
     "origin": "拉丁语 con- + servare",
     "breakdown": "con- + serv- + -ation",
@@ -3433,7 +3433,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "1900年普朗克借用拉丁语 quantum 表示'最小能量单位'。"
-  },
+  , "phrases": [{"en": "quantum mechanics", "zh": "量子力学"}, {"en": "quantum leap", "zh": "巨大飞跃"}, {"en": "quantum computing", "zh": "量子计算"}]},
   "particle": {
     "origin": "拉丁语 particula",
     "breakdown": "part- + -icle",
@@ -3524,7 +3524,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "概率论源于17世纪帕斯卡和费马的通信。"
-  },
+  , "phrases": [{"en": "in all probability", "zh": "十有八九"}, {"en": "probability theory", "zh": "概率论"}, {"en": "high probability", "zh": "高概率"}]},
   "observe": {
     "origin": "拉丁语 ob- + servare",
     "breakdown": "ob- + serv- + e",
@@ -3545,7 +3545,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "字面义'朝向某物保持专注'。同源: conserve, preserve。"
-  },
+  , "phrases": [{"en": "observe the rules", "zh": "遵守规则"}, {"en": "observe a phenomenon", "zh": "观察现象"}, {"en": "closely observe", "zh": "密切观察"}]},
   "predict": {
     "origin": "拉丁语 prae- + dicere",
     "breakdown": "pre- + dict-",
@@ -3566,7 +3566,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "字面义'提前说'。同源: dictionary, dictate。"
-  },
+  , "phrases": [{"en": "predict the future", "zh": "预测未来"}, {"en": "predict an outcome", "zh": "预测结果"}, {"en": "hard to predict", "zh": "难以预测"}]},
   "analyze": {
     "origin": "希腊语 analyein",
     "breakdown": "ana- + ly- + -ze",
@@ -3594,7 +3594,7 @@ const ETYMOLOGY = {
       }
     ],
     "story": "字面义'完全解开'——把复杂整体拆解为简单部分。"
-  },
+  , "phrases": [{"en": "analyze data", "zh": "分析数据"}, {"en": "analyze a problem", "zh": "分析问题"}, {"en": "critically analyze", "zh": "批判性分析"}]},
   "statistic": {
     "origin": "拉丁语 status + 希腊 -istikos",
     "breakdown": "stat- + -istic",
