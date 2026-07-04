@@ -225,6 +225,17 @@ body {
   cursor: not-allowed;
 }
 
+.read-aloud-btn {
+  font-weight: 600;
+}
+
+/* Reading highlight: glow on current paragraph */
+.en-para.reading {
+  background: rgba(59,130,246,0.06);
+  border-left: 3px solid var(--accent-blue);
+  transition: all 0.3s ease;
+}
+
 .article-nav-info {
   font-size: 14px;
   font-weight: 600;

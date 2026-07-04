@@ -242,6 +242,7 @@ function renderArticle(index) {
     '<div class="article-nav-row">' +
       '<button class="article-nav-btn prev-article" ' + (index === 0 ? 'disabled' : '') + '>← 上一篇</button>' +
       '<span class="article-nav-info">' + article.cnTitle + '</span>' +
+      '<button class="article-nav-btn read-aloud-btn" title="朗读全文">🔊 全文朗读</button>' +
       '<button class="article-nav-btn next-article" ' + (index >= ARTICLES.length - 1 ? 'disabled' : '') + '>下一篇 →</button>' +
     '</div>';
 
@@ -322,6 +323,19 @@ function renderArticle(index) {
   if (nextBtn) {
     nextBtn.addEventListener('click', function() {
       if (index < ARTICLES.length - 1) switchView('article', index + 1);
+    });
+  }
+
+  // Read aloud button
+  var readBtn = document.querySelector('.read-aloud-btn');
+  if (readBtn) {
+    readBtn.addEventListener('click', function() {
+      var isReading = this.dataset.reading === 'true';
+      if (isReading) {
+        stopReading();
+      } else {
+        startReading(index);
+      }
     });
   }
 }
@@ -1503,6 +1517,110 @@ function showSylPopup(btnElement, syl, partData) {
     closeBtn.addEventListener('click', function() {
       popup.classList.remove('active');
     });
+  }
+}
+
+// ============================================================
+// Full Article Read-Aloud
+// ============================================================
+
+var readAloudState = {
+  active: false,
+  currentPara: 0,
+  paragraphs: [],
+  articleIndex: 0
+};
+
+function startReading(articleIndex) {
+  if (!window.speechSynthesis) {
+    alert('您的浏览器不支持语音朗读，请使用 Chrome 或 Safari。');
+    return;
+  }
+
+  readAloudState.active = true;
+  readAloudState.currentPara = 0;
+  readAloudState.articleIndex = articleIndex;
+  readAloudState.paragraphs = ARTICLES[articleIndex].paragraphs;
+
+  var btn = document.querySelector('.read-aloud-btn');
+  if (btn) {
+    btn.dataset.reading = 'true';
+    btn.textContent = '⏹ 停止朗读';
+    btn.style.background = 'var(--accent-rose)';
+    btn.style.color = '#fff';
+    btn.style.borderColor = 'var(--accent-rose)';
+  }
+
+  // Highlight first paragraph
+  highlightReadingPara(0);
+  speakNextParagraph();
+}
+
+function speakNextParagraph() {
+  if (!readAloudState.active) return;
+
+  var idx = readAloudState.currentPara;
+  if (idx >= readAloudState.paragraphs.length) {
+    stopReading();
+    return;
+  }
+
+  // Strip HTML tags and vocab markers
+  var text = readAloudState.paragraphs[idx].replace(/\*\*/g, '').replace(/<[^>]+>/g, '');
+  highlightReadingPara(idx);
+
+  var utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'en-US';
+  utterance.rate = 0.9;
+  utterance.pitch = 1;
+
+  var voices = window.speechSynthesis.getVoices();
+  var enVoice = voices.find(function(v) { return v.lang.startsWith('en-US') && v.name.includes('Google'); })
+    || voices.find(function(v) { return v.lang.startsWith('en-US'); })
+    || voices.find(function(v) { return v.lang.startsWith('en'); });
+  if (enVoice) utterance.voice = enVoice;
+
+  utterance.onend = function() {
+    readAloudState.currentPara++;
+    if (readAloudState.active) speakNextParagraph();
+  };
+
+  utterance.onerror = function() {
+    readAloudState.currentPara++;
+    if (readAloudState.active) speakNextParagraph();
+  };
+
+  window.speechSynthesis.speak(utterance);
+}
+
+function highlightReadingPara(idx) {
+  // Remove previous highlights
+  document.querySelectorAll('.en-para.reading').forEach(function(el) {
+    el.classList.remove('reading');
+  });
+
+  var paras = document.querySelectorAll('.en-para');
+  if (paras[idx]) {
+    paras[idx].classList.add('reading');
+    paras[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+function stopReading() {
+  readAloudState.active = false;
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+  document.querySelectorAll('.en-para.reading').forEach(function(el) {
+    el.classList.remove('reading');
+  });
+
+  var btn = document.querySelector('.read-aloud-btn');
+  if (btn) {
+    btn.dataset.reading = 'false';
+    btn.textContent = '🔊 全文朗读';
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.style.borderColor = '';
   }
 }
 
