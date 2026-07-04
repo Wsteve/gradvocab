@@ -283,8 +283,17 @@ body {
 .cn-vocab {
   color: var(--accent-green);
   font-weight: 600;
-  border-bottom: 2px dashed rgba(52, 211, 153, 0.3);
+  border-bottom: 2px dashed rgba(16, 185, 129, 0.25);
   cursor: default;
+  transition: all 0.2s ease;
+}
+
+.cn-vocab.active {
+  color: #059669;
+  background: rgba(16, 185, 129, 0.12);
+  border-bottom: 2px solid var(--accent-green);
+  border-radius: 3px;
+  padding: 0 2px;
 }
 
 /* Ensure vocab-word still works in English column */

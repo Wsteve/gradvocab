@@ -252,6 +252,8 @@ function renderArticle(index) {
     el.addEventListener('click', (e) => {
       const idx = parseInt(el.dataset.wordIndex);
       showWordPopup(idx, index, e);
+      // Cross-highlight: find matching CN word in the same paragraph pair
+      highlightCNMatch(el);
     });
   });
 
@@ -295,6 +297,36 @@ function highlightWords(text, articleWords) {
     });
   });
   return result;
+}
+
+// Cross-highlight: when clicking EN word, highlight matching CN word
+function highlightCNMatch(enElement) {
+  // Remove all previous CN highlights
+  document.querySelectorAll('.cn-vocab.active').forEach(function(el) {
+    el.classList.remove('active');
+  });
+
+  // Find which vocab-word this is within its paragraph
+  var paraEl = enElement.closest('.en-para');
+  if (!paraEl) return;
+
+  var allEnWords = paraEl.querySelectorAll('.vocab-word');
+  var wordIndex = -1;
+  for (var i = 0; i < allEnWords.length; i++) {
+    if (allEnWords[i] === enElement) { wordIndex = i; break; }
+  }
+  if (wordIndex < 0) return;
+
+  // Find the matching CN word in the same para-pair
+  var pairEl = enElement.closest('.para-pair');
+  if (!pairEl) return;
+
+  var allCnWords = pairEl.querySelectorAll('.cn-vocab');
+  if (wordIndex < allCnWords.length) {
+    allCnWords[wordIndex].classList.add('active');
+    // Scroll CN word into view if needed
+    allCnWords[wordIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
 }
 
 // --- Word Popup ---
