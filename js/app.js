@@ -15,9 +15,17 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initApp() {
-  renderHome();
+  // Start with first article (or last read) instead of card grid
+  var lastIdx = localStorage.getItem('lastArticleIndex');
+  var startIdx = lastIdx !== null ? parseInt(lastIdx) : 0;
+  currentArticle = startIdx;
+  renderArticle(startIdx);
+  document.querySelector('.view-article').classList.add('active');
+  document.querySelector('.nav-tab[data-view="home"]').classList.add('active');
   renderNav();
   setupEventListeners();
+  updateProgress();
+  updateStreak();
 }
 
 // --- Navigation ---
@@ -74,8 +82,12 @@ function switchView(view, articleId) {
   });
 
   if (view === 'home') {
-    document.querySelector('.view-home').classList.add('active');
-    renderContinueStudying();
+    // Home = show article reader (last read or first)
+    var lastIdx = localStorage.getItem('lastArticleIndex');
+    var articleIdx = lastIdx !== null ? parseInt(lastIdx) : 0;
+    currentArticle = articleIdx;
+    renderArticle(articleIdx);
+    document.querySelector('.view-article').classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } else if (view === 'article' && articleId !== undefined) {
     // Stop previous slideshow autoplay
@@ -164,13 +176,26 @@ function renderArticle(index) {
   // Render slideshow
   renderSlideshow(index);
 
+  // Update back button to show article selector
+  var backBtn = document.querySelector('.back-btn');
+  if (backBtn) {
+    backBtn.innerHTML = '← 文章 ' + (index + 1) + ' / ' + ARTICLES.length;
+    backBtn.style.pointerEvents = 'none';
+    backBtn.style.opacity = '0.6';
+  }
+
   // Content - bilingual layout
   const contentDiv = document.querySelector('.reader-content');
 
-  // Column headers
+  // Column headers with navigation between them
   var headersHTML = '<div class="reader-column-headers">' +
     '<div class="col-header">🇬🇧 English</div>' +
     '<div class="col-header">🇨🇳 中文</div>' +
+    '</div>' +
+    '<div class="article-nav-row">' +
+      '<button class="article-nav-btn prev-article" ' + (index === 0 ? 'disabled' : '') + '>← 上一篇</button>' +
+      '<span class="article-nav-info">' + article.cnTitle + '</span>' +
+      '<button class="article-nav-btn next-article" ' + (index >= ARTICLES.length - 1 ? 'disabled' : '') + '>下一篇 →</button>' +
     '</div>';
 
   // Paragraph pairs
@@ -233,6 +258,20 @@ function renderArticle(index) {
 
     document.querySelector('.btn-complete').addEventListener('click', () => {
       toggleArticleComplete(index);
+    });
+  }
+
+  // Article navigation buttons
+  var prevBtn = document.querySelector('.prev-article');
+  var nextBtn = document.querySelector('.next-article');
+  if (prevBtn) {
+    prevBtn.addEventListener('click', function() {
+      if (index > 0) switchView('article', index - 1);
+    });
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener('click', function() {
+      if (index < ARTICLES.length - 1) switchView('article', index + 1);
     });
   }
 }
