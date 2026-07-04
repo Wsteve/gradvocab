@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>研究生单词 · 科学 × 篮球阅读器</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ======== Header ======== -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-icon">G</div>
+      <span class="logo-text">GradVocab</span>
+      <span class="logo-sub">· 研究生单词阅读</span>
+    </div>
+
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-view="home">📖 文章</button>
+      <button class="nav-tab" data-view="flashcards">🎴 闪卡</button>
+      <button class="nav-tab" data-view="words">📚 单词本</button>
+      <button class="nav-tab" data-view="plan">📋 计划</button>
+    </div>
+
+    <div class="header-progress">
+      <span class="streak-counter" title="学习连续天数">🔥 0 天</span>
+      <span>0/150</span>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: 0%"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======== Main Container ======== -->
+  <div class="app-container">
+
+    <!-- ===== Home View ===== -->
+    <div class="view-home active">
+      <h1 class="section-title">📖 10篇阅读 · 掌握150个研究生单词</h1>
+      <p class="section-subtitle">每篇文章融合科学杂志深度 + 篮球体育新闻，四级水平也能轻松读懂</p>
+      <div class="article-grid"></div>
+      <div class="continue-studying"></div>
+    </div>
+
+    <!-- ===== Flashcard View ===== -->
+    <div class="view-flashcards">
+      <h1 class="section-title">🎴 闪卡模式</h1>
+      <p class="section-subtitle">翻转卡片记忆单词 · 键盘快捷键：Space=翻转 ←→=导航 S=发音</p>
+
+      <div class="flashcard-controls">
+        <div class="flashcard-filter">
+          <select class="flashcard-select" id="flashcard-filter">
+            <option value="all">全部单词 (150)</option>
+            <option value="article-0">Article 1: 基因与篮球天赋</option>
+            <option value="article-1">Article 2: 防守黑洞</option>
+            <option value="article-2">Article 3: 神经科学与球场视野</option>
+            <option value="article-3">Article 4: 绿色场馆</option>
+            <option value="article-4">Article 5: 量子分析与投篮</option>
+            <option value="article-5">Article 6: 进化与现代球员</option>
+            <option value="article-6">Article 7: 深海与团队协作</option>
+            <option value="article-7">Article 8: 病毒式复出</option>
+            <option value="article-8">Article 9: AI与球探</option>
+            <option value="article-9">Article 10: 冠军心流</option>
+            <option value="unlearned">未掌握</option>
+            <option value="learned">已掌握</option>
+          </select>
+        </div>
+        <div class="flashcard-mode">
+          <button class="mode-btn active" data-mode="sequential">📋 顺序</button>
+          <button class="mode-btn" data-mode="random">🎲 随机</button>
+        </div>
+        <div class="flashcard-toggles">
+          <label class="toggle-label">
+            <input type="checkbox" id="auto-speak" checked>
+            🔊 自动发音
+          </label>
+        </div>
+      </div>
+
+      <div class="flashcard-stage">
+        <button class="flashcard-nav-btn prev" title="上一个 (←)">←</button>
+        <div class="flashcard-card" id="flashcard-card">
+          <div class="flashcard-inner">
+            <div class="flashcard-front">
+              <div class="fc-word"></div>
+              <div class="fc-syllables"></div>
+              <div class="fc-phonetic"></div>
+              <div class="fc-hint">点击或按 Space 翻转</div>
+            </div>
+            <div class="flashcard-back">
+              <div class="fc-meaning"></div>
+              <div class="fc-etymology"></div>
+              <div class="fc-sentence"></div>
+            </div>
+          </div>
+        </div>
+        <button class="flashcard-nav-btn next" title="下一个 (→)">→</button>
+      </div>
+
+      <div class="flashcard-footer">
+        <div class="flashcard-counter" id="flashcard-counter">1 / 150</div>
+        <button class="flashcard-learned-btn" id="flashcard-learned-btn">✅ 标记已掌握</button>
+        <button class="flashcard-speak-btn" id="flashcard-speak-btn" title="听发音 (S)">🔊 发音</button>
+      </div>
+
+      <div class="flashcard-progress">
+        <div class="flashcard-progress-bar">
+          <div class="flashcard-progress-fill" id="flashcard-progress-fill"></div>
+        </div>
+        <span class="flashcard-progress-text" id="flashcard-progress-text">0/150 已掌握</span>
+      </div>
+    </div>
+
+    <!-- ===== Article View ===== -->
+    <div class="view-article">
+      <div class="reader-header">
+        <button class="back-btn">← 返回文章列表</button>
+        <div class="reader-title-row">
+          <div>
+            <h1 class="reader-title"></h1>
+            <div class="reader-cn-title"></div>
+          </div>
+          <div class="reader-labels"></div>
+        </div>
+        <div class="reader-word-count"></div>
+      </div>
+
+      <!-- Slideshow -->
+      <div class="slideshow-container">
+        <div class="slideshow-track" id="slideshow-track">
+          <!-- Slides rendered by JS -->
+        </div>
+        <div class="slideshow-dots" id="slideshow-dots"></div>
+      </div>
+
+      <div class="reader-content"></div>
+
+      <!-- Latin Poetry Section -->
+      <div class="reader-latin" id="reader-latin">
+        <div class="latin-badge">LATINUM POEMA · 拉丁诗文</div>
+        <div class="latin-verse" id="latin-verse"></div>
+        <div class="latin-translation" id="latin-translation"></div>
+        <div class="latin-connection" id="latin-connection"></div>
+      </div>
+
+      <!-- Bottom word list for this article -->
+      <div class="article-word-section">
+        <h3>
+          <span>📝 本课单词</span>
+          <span style="font-size:12px;color:var(--text-muted);font-weight:400">（点击查看释义 & 听发音）</span>
+        </h3>
+        <div class="article-word-list"></div>
+        <div class="btn-container" style="margin-top:16px;text-align:right"></div>
+      </div>
+    </div>
+
+    <!-- ===== Word List View ===== -->
+    <div class="view-words">
+      <div class="words-header">
+        <h1 class="section-title">📚 全部单词</h1>
+        <p class="section-subtitle">150个研究生核心词汇 · 点击听发音</p>
+        <div class="stats-bar"></div>
+      </div>
+
+      <div class="download-section">
+        <h3>📥 下载词库</h3>
+        <div class="download-buttons">
+          <button class="download-btn" data-format="memo">墨墨词库 (TSV)</button>
+          <button class="download-btn" data-format="anki-simple">Anki 简单版 (CSV)</button>
+          <button class="download-btn" data-format="anki-full">Anki 详细版 (CSV)</button>
+        </div>
+      </div>
+
+      <div class="word-filter-bar"></div>
+      <div class="word-list"></div>
+    </div>
+
+    <!-- ===== Study Plan View ===== -->
+    <div class="view-plan">
+      <h1 class="section-title">📋 30天学习计划</h1>
+      <p class="section-subtitle">三阶段循序渐进 · 每天15个单词 · 10篇文章</p>
+
+      <div class="plan-setup" id="plan-setup">
+        <p>设置开始日期以追踪学习进度：</p>
+        <button class="plan-start-btn" id="plan-start-today">📅 从今天开始</button>
+      </div>
+
+      <div class="plan-phases" id="plan-phases">
+        <!-- Phase 1: Foundation -->
+        <div class="plan-phase">
+          <div class="phase-header">
+            <span class="phase-icon">🏗️</span>
+            <div>
+              <h3>第一阶段：基础积累</h3>
+              <p class="phase-desc">第 1-10 天 · 掌握核心词根与高频词汇</p>
+            </div>
+          </div>
+          <div class="phase-days" id="phase1-days"></div>
+        </div>
+
+        <!-- Phase 2: Expansion -->
+        <div class="plan-phase">
+          <div class="phase-header">
+            <span class="phase-icon">🚀</span>
+            <div>
+              <h3>第二阶段：扩展提升</h3>
+              <p class="phase-desc">第 11-20 天 · 学术词汇与语境应用</p>
+            </div>
+          </div>
+          <div class="phase-days" id="phase2-days"></div>
+        </div>
+
+        <!-- Phase 3: Mastery -->
+        <div class="plan-phase">
+          <div class="phase-header">
+            <span class="phase-icon">🏆</span>
+            <div>
+              <h3>第三阶段：精通冲刺</h3>
+              <p class="phase-desc">第 21-30 天 · 综合复习与真题模拟</p>
+            </div>
+          </div>
+          <div class="phase-days" id="phase3-days"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ======== Word Popup ======== -->
+  <div class="word-popup-overlay">
+    <div class="word-popup">
+      <div class="popup-word"></div>
+      <div class="popup-syllables"></div>
+      <div class="popup-phonetic"></div>
+      <div class="popup-meaning"></div>
+      <div class="popup-sentence"></div>
+
+      <!-- Etymology section -->
+      <div class="popup-etymology">
+        <div class="ety-header">📜 词源故事 · 音节发音来源</div>
+        <div class="ety-origin"></div>
+        <div class="ety-breakdown"></div>
+        <div class="ety-syllables"></div>
+        <div class="ety-story"></div>
+      </div>
+
+      <div class="popup-actions">
+        <button class="btn-speak">🔊 听发音</button>
+        <button class="btn-close-popup">✕ 关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== Scroll to Top ======== -->
+  <button class="scroll-top">↑</button>
+
+  <!-- ======== Scripts ======== -->
+  <script src="js/data.js"></script>
+  <script src="js/etymology.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
