@@ -326,59 +326,125 @@ body {
 
 .word-popup-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.35); backdrop-filter: blur(4px);
-  z-index: 200; display: none; align-items: center; justify-content: center;
+  background: transparent;
+  z-index: 200; display: none;
 }
-.word-popup-overlay.active { display: flex; }
+.word-popup-overlay.active { display: block; }
 
 .word-popup {
-  background: var(--bg-secondary); border: 1px solid var(--border-color);
-  border-radius: var(--radius); padding: 32px; max-width: 420px; width: 90%;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  position: fixed;
+  z-index: 201;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 16px;
+  padding: 16px 20px;
+  max-width: 520px;
+  width: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+  display: none;
   animation: popupIn 0.2s ease;
 }
 
 @keyframes popupIn {
-  from { opacity: 0; transform: scale(0.95) translateY(10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.popup-word { font-size: 28px; font-weight: 700; color: var(--accent-amber); margin-bottom: 4px; }
-.popup-syllables { color: var(--text-secondary); font-size: 15px; margin-bottom: 8px; }
+.word-popup.active { display: block; }
+
+/* Horizontal row: word + phonetic + meaning */
+.popup-main-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.popup-word {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--accent-amber);
+  white-space: nowrap;
+}
+
+.popup-syllables {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
 .popup-phonetic {
   color: var(--accent-cyan);
-  font-size: 18px;
-  margin-bottom: 16px;
+  font-size: 16px;
   font-family: var(--font-serif);
   font-weight: 600;
-  background: #ecfeff;
-  padding: 6px 14px;
-  border-radius: 6px;
-  display: inline-block;
+  background: rgba(6,182,212,0.06);
+  padding: 4px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
 }
-.popup-meaning { font-size: 18px; color: var(--text-primary); margin-bottom: 20px; font-weight: 500; }
 
+.popup-meaning {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Compact sentence below */
 .popup-sentence {
-  font-size: 14px; color: var(--text-secondary); line-height: 1.8;
-  padding: 12px 16px; background: #fefce8;
-  border-radius: var(--radius-sm); border-left: 3px solid var(--accent-amber);
-  margin-bottom: 20px; font-family: var(--font-serif);
+  font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+  padding: 8px 12px; background: rgba(245,158,11,0.06);
+  border-radius: 8px; border-left: 3px solid var(--accent-amber);
+  margin-top: 10px; font-family: var(--font-serif);
+  max-height: 48px; overflow: hidden;
 }
 
-.popup-actions { display: flex; gap: 10px; }
+/* Actions row */
+.popup-actions {
+  display: flex; gap: 8px; margin-top: 10px;
+}
 
 .popup-actions button {
-  flex: 1; padding: 10px; border: none; border-radius: var(--radius-sm);
-  font-size: 14px; font-weight: 600; cursor: pointer;
+  padding: 6px 14px; border: none; border-radius: 20px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
   transition: var(--transition);
-  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--font-main);
 }
 
-.btn-speak { background: var(--accent-blue); color: #fff; }
-.btn-speak:hover { background: #4b8fd4; }
+.btn-speak {
+  background: var(--accent-blue); color: #fff;
+}
+.btn-speak:hover { background: #2563eb; }
 
-.btn-close-popup { background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border-color); }
-.btn-close-popup:hover { background: var(--bg-hover); color: var(--text-primary); }
+.btn-close-popup {
+  background: rgba(0,0,0,0.04); color: var(--text-muted);
+}
+.btn-close-popup:hover { background: rgba(0,0,0,0.08); color: var(--text-primary); }
+
+/* Etymology inside popup - collapsible */
+.popup-etymology {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: rgba(139,92,246,0.04);
+  border-radius: 8px;
+  border: 1px solid rgba(139,92,246,0.1);
+  max-height: 140px; overflow-y: auto;
+  font-size: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .word-popup {
+    max-width: 94vw;
+    left: 3vw !important;
+    right: 3vw !important;
+    padding: 14px 16px;
+  }
+  .popup-word { font-size: 22px; }
+  .popup-meaning { font-size: 17px; }
+  .popup-phonetic { font-size: 14px; padding: 3px 10px; }
+}
 
 .words-header { margin-bottom: 24px; }
 
@@ -468,7 +534,6 @@ body {
   .reader-title { font-size: 22px; }
   .section-title { font-size: 22px; }
   .word-list { grid-template-columns: 1fr; }
-  .word-popup { padding: 24px; }
 }
 
 

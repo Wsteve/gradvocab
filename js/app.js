@@ -49,9 +49,15 @@ function setupEventListeners() {
   });
 
   // Close popup
-  document.querySelector('.btn-close-popup')?.addEventListener('click', closeWordPopup);
-  document.querySelector('.word-popup-overlay')?.addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) closeWordPopup();
+  document.querySelector('.btn-close-popup')?.addEventListener('click', function(e) {
+    e.stopPropagation();
+    closeWordPopup();
+  });
+  document.querySelector('.word-popup-overlay')?.addEventListener('click', function(e) {
+    // Close if clicking the transparent overlay (not the popup itself)
+    if (!e.target.closest('.word-popup') && !e.target.closest('.syl-popup')) {
+      closeWordPopup();
+    }
   });
 
   // Scroll to top
@@ -230,7 +236,7 @@ function renderArticle(index) {
   document.querySelectorAll('.article-word-chip').forEach(chip => {
     chip.addEventListener('click', (e) => {
       const idx = parseInt(chip.dataset.wordIndex);
-      showWordPopup(idx, index);
+      showWordPopup(idx, index, e);
     });
 
     const speakBtn = chip.querySelector('.chip-speak');
@@ -245,7 +251,7 @@ function renderArticle(index) {
   document.querySelectorAll('.vocab-word').forEach(el => {
     el.addEventListener('click', (e) => {
       const idx = parseInt(el.dataset.wordIndex);
-      showWordPopup(idx, index);
+      showWordPopup(idx, index, e);
     });
   });
 
@@ -292,28 +298,34 @@ function highlightWords(text, articleWords) {
 }
 
 // --- Word Popup ---
-function showWordPopup(wordIndex, articleIndex) {
-  const word = WORDS[wordIndex];
-  const overlay = document.querySelector('.word-popup-overlay');
-  overlay.classList.add('active');
+var popupCloseTimer = null;
 
-  document.querySelector('.popup-word').textContent = word.word;
-  document.querySelector('.popup-syllables').textContent = `✦ ${word.syllables}`;
-  document.querySelector('.popup-phonetic').textContent = word.phonetic;
-  document.querySelector('.popup-meaning').textContent = `🇨🇳 ${word.meaning}`;
+function showWordPopup(wordIndex, articleIndex, clickEvent) {
+  const word = WORDS[wordIndex];
+  const popup = document.querySelector('.word-popup');
+  const overlay = document.querySelector('.word-popup-overlay');
+
+  // Clear any pending close timer
+  if (popupCloseTimer) { clearTimeout(popupCloseTimer); popupCloseTimer = null; }
+
+  // Fill compact content
+  popup.querySelector('.popup-word').textContent = word.word;
+  popup.querySelector('.popup-syllables').textContent = word.syllables;
+  popup.querySelector('.popup-phonetic').textContent = word.phonetic;
+  popup.querySelector('.popup-meaning').textContent = word.meaning;
 
   // Find sentence from article
-  const article = ARTICLES[articleIndex];
-  let sentence = '';
-  for (const para of article.paragraphs) {
-    const regex = new RegExp('\\b' + word.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+  var article = ARTICLES[articleIndex];
+  var sentence = '';
+  for (var pi = 0; pi < article.paragraphs.length; pi++) {
+    var para = article.paragraphs[pi];
+    var regex = new RegExp('\\b' + word.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
     if (regex.test(para)) {
-      sentence = para.replace(regex, `**${word.word}**`);
-      // Trim to around 100 chars
-      const matchIndex = sentence.indexOf(`**${word.word}**`);
-      const start = Math.max(0, matchIndex - 50);
-      const end = Math.min(sentence.length, matchIndex + word.word.length + 60);
-      let excerpt = sentence.substring(start, end);
+      sentence = para.replace(regex, '**' + word.word + '**');
+      var matchIndex = sentence.indexOf('**' + word.word + '**');
+      var start = Math.max(0, matchIndex - 30);
+      var end = Math.min(sentence.length, matchIndex + word.word.length + 50);
+      var excerpt = sentence.substring(start, end);
       if (start > 0) excerpt = '...' + excerpt;
       if (end < sentence.length) excerpt = excerpt + '...';
       sentence = excerpt;
@@ -321,33 +333,63 @@ function showWordPopup(wordIndex, articleIndex) {
     }
   }
 
-  // Show etymology info
+  popup.querySelector('.popup-sentence').innerHTML = sentence
+    ? sentence.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    : '';
+
+  // Etymology (compact)
   renderEtymology(word, wordIndex);
 
-  document.querySelector('.popup-sentence').innerHTML = sentence
-    ? `📖 ${sentence}`
-    : '📖 来自本文例句';
-
   // Speak button
-  const speakBtn = document.querySelector('.btn-speak');
-  const newBtn = speakBtn.cloneNode(true);
-  speakBtn.parentNode.replaceChild(newBtn, speakBtn);
+  var speakBtn = popup.querySelector('.btn-speak');
+  var newSpeak = speakBtn.cloneNode(true);
+  speakBtn.parentNode.replaceChild(newSpeak, speakBtn);
+  newSpeak.addEventListener('click', function() { speakWord(word.word); });
 
-  newBtn.addEventListener('click', () => {
-    speakWord(word.word);
-  });
+  // Position near the clicked element
+  positionPopupNear(clickEvent);
+
+  // Show
+  overlay.classList.add('active');
+  popup.classList.add('active');
 
   // Mark as learned
   if (!learnedWords.has(wordIndex)) {
     toggleLearned(wordIndex);
-    // Update the UI
     renderArticle(articleIndex);
     updateProgress();
   }
 }
 
+function positionPopupNear(clickEvent) {
+  var popup = document.querySelector('.word-popup');
+  if (!popup) return;
+
+  // Default: center-top
+  var left = (window.innerWidth - 500) / 2;
+  var top = 80;
+
+  if (clickEvent && clickEvent.target) {
+    var rect = clickEvent.target.getBoundingClientRect();
+    var pw = Math.min(500, window.innerWidth - 20);
+    left = rect.left + (rect.width / 2) - (pw / 2);
+    top = rect.bottom + 8;
+
+    // Keep in viewport
+    if (left < 10) left = 10;
+    if (left + pw > window.innerWidth - 10) left = window.innerWidth - pw - 10;
+    if (top + 200 > window.innerHeight) top = rect.top - 210;
+    if (top < 10) top = 10;
+  }
+
+  popup.style.left = left + 'px';
+  popup.style.top = top + 'px';
+  popup.style.maxWidth = '500px';
+}
+
 function closeWordPopup() {
   document.querySelector('.word-popup-overlay').classList.remove('active');
+  document.querySelector('.word-popup').classList.remove('active');
 }
 
 // --- Speak (Web Speech API) ---
