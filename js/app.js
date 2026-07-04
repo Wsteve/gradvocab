@@ -58,6 +58,13 @@ function setupEventListeners() {
 
 function switchView(view, articleId) {
   currentView = view;
+
+  // Track activity
+  if (view === 'article' && articleId !== undefined) {
+    localStorage.setItem('lastArticleIndex', articleId);
+  }
+  localStorage.setItem('lastInteractionDate', new Date().toISOString().split('T')[0]);
+
   document.querySelectorAll('.view-home, .view-article, .view-words, .view-flashcards, .view-plan').forEach(el => {
     el.classList.remove('active');
   });
@@ -744,11 +751,12 @@ var studyDayChecks = JSON.parse(localStorage.getItem('studyDayChecks') || '{}');
 
 var STUDY_PLAN = [];
 (function buildStudyPlan() {
+  try {
   for (var phase = 0; phase < 3; phase++) {
     for (var day = 0; day < 10; day++) {
       var dayNum = phase * 10 + day + 1;
       var articleIdx = day;
-      var article = articleIdx < ARTICLES.length ? ARTICLES[articleIdx] : null;
+      var article = typeof ARTICLES !== 'undefined' && articleIdx < ARTICLES.length ? ARTICLES[articleIdx] : null;
       var items = [];
       if (phase === 0) {
         items.push({ text: '学习 ' + (article ? article.cnTitle : '新单词'), link: articleIdx, type: 'article' });
@@ -768,6 +776,9 @@ var STUDY_PLAN = [];
       }
       STUDY_PLAN.push({ day: dayNum, phase: phase, items: items });
     }
+  }
+  } catch(e) {
+    console.warn('Study plan generation failed, falling back to empty plan:', e.message);
   }
 })();
 
@@ -909,15 +920,6 @@ function renderContinueStudying() {
     if (lastArticleIdx !== null) switchView('article', parseInt(lastArticleIdx));
   });
 }
-
-// Track last article and daily interaction
-var _origSwitchView = switchView;
-switchView = function(view, articleId) {
-  if (view === 'article' && articleId !== undefined) localStorage.setItem('lastArticleIndex', articleId);
-  var today = new Date().toISOString().split('T')[0];
-  localStorage.setItem('lastInteractionDate', today);
-  _origSwitchView(view, articleId);
-};
 
 
 // --- Keyboard shortcuts ---
