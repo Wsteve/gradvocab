@@ -1807,18 +1807,21 @@ body {
   position: fixed;
   top: 72px;
   right: 16px;
-  width: 280px;
+  width: 320px;
   max-height: calc(100vh - 100px);
   overflow-y: auto;
-  background: rgba(255,255,255,0.96);
+  background: rgba(255,255,255,0.97);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.1);
+  border: 3px solid var(--accent-amber);
+  border-radius: 20px;
+  box-shadow:
+    0 16px 48px rgba(0,0,0,0.1),
+    0 0 0 6px rgba(245,158,11,0.1),
+    0 0 0 12px rgba(245,158,11,0.05);
   z-index: 150;
   display: none;
-  animation: sidebarIn 0.25s ease;
+  animation: sidebarIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes sidebarIn {

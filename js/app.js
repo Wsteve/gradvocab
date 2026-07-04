@@ -64,6 +64,46 @@ function setupEventListeners() {
     document.getElementById('word-sidebar').classList.remove('active');
   });
 
+  // Universal click-to-speak: click any word in English column to hear it
+  document.addEventListener('click', function(e) {
+    // Only in English paragraphs (not in sidebar, popups, or nav)
+    if (e.target.closest('.word-sidebar') || e.target.closest('.word-popup') ||
+        e.target.closest('.syl-popup') || e.target.closest('.app-header') ||
+        e.target.closest('button') || e.target.closest('select') ||
+        e.target.closest('input') || e.target.closest('.sb-root-card')) return;
+
+    // Don't double-speak vocab words
+    if (e.target.classList.contains('vocab-word') || e.target.closest('.vocab-word')) return;
+
+    // Get the word under click using caret range (cross-browser)
+    var range;
+    if (document.caretRangeFromPoint) {
+      range = document.caretRangeFromPoint(e.clientX, e.clientY);
+    } else if (document.caretPositionFromPoint) {
+      var pos = document.caretPositionFromPoint(e.clientX, e.clientY);
+      if (pos) {
+        range = document.createRange();
+        range.setStart(pos.offsetNode, pos.offset);
+        range.setEnd(pos.offsetNode, pos.offset);
+      }
+    }
+    if (!range || !range.startContainer) return;
+
+    var textNode = range.startContainer;
+    if (textNode.nodeType !== 3) return;
+
+    var offset = range.startOffset;
+    var text = textNode.textContent;
+    var start = offset, end = offset;
+    while (start > 0 && /[a-zA-Z]/.test(text[start - 1])) start--;
+    while (end < text.length && /[a-zA-Z]/.test(text[end])) end++;
+
+    var word = text.substring(start, end).trim();
+    if (word.length >= 2 && /^[a-zA-Z]+$/.test(word)) {
+      speakWord(word);
+    }
+  });
+
   // Scroll to top
   const scrollBtn = document.querySelector('.scroll-top');
   window.addEventListener('scroll', () => {
@@ -400,7 +440,6 @@ function showWordSidebar(wordIndex) {
         '<div class="sb-root-ipa">' + (p.ipa || '') + '</div>' +
         '<span class="sb-root-lang ' + langClass + '">' + langShort + '</span>' +
         '<div class="sb-root-note">' + (p.note ? p.note.substring(0, 30) : '') + '</div>' +
-        '<div class="sb-root-speak">🔊</div>' +
         '</div>';
     }).join('');
 
