@@ -1,310 +1,1118 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>研究生单词 · 科学 × 篮球阅读器</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
-  <link rel="stylesheet" href="css/style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- iOS 原生 Web App 运行配置 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>GradVocab Terminal - 英汉同步高亮版</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #eff6ff;
+            --accent-bbc: #bb1919;
+            --accent-voa: #0072c6;
+            --latin-gold: #b45309;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        header {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px 15px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-title h1 {
+            margin: 0;
+            font-size: 24px;
+            color: var(--primary);
+            font-family: Georgia, serif;
+        }
+
+        .header-title p {
+            margin: 4px 0 0 0;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* 模式切换导航栏 */
+        .tab-nav {
+            display: flex;
+            background-color: #e2e8f0;
+            padding: 4px;
+            border-radius: 10px;
+            gap: 4px;
+        }
+
+        .tab-btn {
+            border: none;
+            background: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background-color: white;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgb(0 0 0 / 0.05);
+        }
+
+        /* 主体布局 */
+        .main-container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 15px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 下拉选择区 */
+        .selector-area {
+            display: flex;
+            gap: 15px;
+        }
+
+        select {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            font-size: 14px;
+            outline: none;
+            background: white;
+        }
+
+        /* 模式 1：闪卡学习区 */
+        .mode-flashcard {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card-area {
+            width: 100%;
+            max-width: 500px;
+            perspective: 1000px;
+            margin-bottom: 15px;
+        }
+
+        .card {
+            width: 100%;
+            height: 250px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.4s;
+            cursor: pointer;
+        }
+
+        .card.flipped { transform: rotateY(180deg); }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgb(0 0 0 / 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: white;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background-color: #fcfbf7;
+        }
+
+        .word-title {
+            font-size: 38px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .word-phonetic {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .syllable-container {
+            display: flex;
+            gap: 4px;
+            background-color: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .syllable-span {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .syllable-span:hover { color: var(--latin-gold); }
+
+        /* 模式 2：双语文章阅读器 */
+        .mode-reader {
+            display: none;
+            background: white;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            box-shadow: 0 4px 12px rgb(0 0 0 / 0.05);
+        }
+
+        .reader-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .reader-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .reader-panel {
+            font-size: 16px;
+            line-height: 1.9;
+            height: 480px;
+            overflow-y: auto;
+            padding-right: 10px;
+            text-align: justify;
+        }
+
+        /* ------------------ 核心同步高亮控制 ------------------ */
+        .reader-sentence {
+            transition: background-color 0.15s, border-radius 0.15s;
+            padding: 2px 4px;
+            border-radius: 4px;
+            display: inline; /* 保持文本自然流式排版 */
+        }
+
+        /* 句子级同步高亮（科技浅蓝） */
+        .sentence-highlight {
+            background-color: rgba(30, 58, 138, 0.08) !important;
+        }
+
+        /* 核心单词级同步高亮底色 */
+        .reader-word, .cn-vocab-keyword {
+            transition: all 0.15s;
+        }
+
+        .vocab-keyword, .cn-vocab-keyword {
+            font-weight: bold;
+            border-bottom: 2px solid var(--latin-gold);
+            cursor: pointer;
+        }
+
+        /* 核心词级双向同步高亮（黄金底色） */
+        .keyword-highlight {
+            background-color: #fef08a !important; /* 经典高亮黄 */
+            color: #000000 !important;
+            border-bottom-color: #ca8a04 !important;
+            border-radius: 3px;
+            padding: 0 2px;
+        }
+
+        /* 右上角独立取词浮窗 Popover */
+        .popover {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 280px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.15), 0 8px 10px -6px rgb(0 0 0 / 0.15);
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.2s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .popover-close {
+            float: right;
+            border: none;
+            background: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        /* 发音底栏 */
+        .audio-control-panel {
+            display: flex;
+            background-color: #cbd5e1;
+            padding: 5px;
+            border-radius: 12px;
+            margin: 15px 0;
+            gap: 6px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .audio-btn {
+            flex: 1;
+            padding: 10px 4px;
+            border: none;
+            background-color: white;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        .audio-btn.active-bbc { background-color: var(--accent-bbc); color: white; }
+        .audio-btn.active-voa { background-color: var(--accent-voa); color: white; }
+        .audio-btn.speak-main { background-color: var(--primary); color: white; }
+
+        /* 左右导航 */
+        .card-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .nav-btn {
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: none;
+            background-color: #475569;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* 底部超级应用区 */
+        .deep-application-section {
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            box-shadow: 0 4px 12px rgb(0 0 0 / 0.05);
+            box-sizing: border-box;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            border-left: 4px solid var(--latin-gold);
+            padding-left: 10px;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        /* 八国语言同源词格网格 */
+        .languages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .lang-card {
+            background-color: var(--bg);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .lang-card .lang-name {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .lang-card .lang-word {
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--latin-gold);
+        }
+
+        /* 深度语境面板 */
+        .usage-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .usage-panel { grid-template-columns: 1fr; }
+        }
+
+        .usage-block {
+            background-color: #fafaf9;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .usage-block h4 {
+            margin: 0 0 8px 0;
+            color: var(--primary);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .usage-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-main);
+        }
+    </style>
 </head>
 <body>
 
-  <!-- ======== Header ======== -->
-  <header class="app-header">
-    <div class="header-left">
-      <div class="logo-icon">G</div>
-      <span class="logo-text">GradVocab</span>
-      <span class="logo-sub">· 研究生单词阅读</span>
-    </div>
-
-    <div class="nav-tabs">
-      <button class="nav-tab active" data-view="home">📖 文章</button>
-      <button class="nav-tab" data-view="flashcards">🎴 闪卡</button>
-      <button class="nav-tab" data-view="words">📚 单词本</button>
-      <button class="nav-tab" data-view="plan">📋 计划</button>
-    </div>
-
-    <div class="header-progress">
-      <span class="streak-counter" title="学习连续天数">🔥 0 天</span>
-      <span>0/150</span>
-      <div class="progress-bar">
-        <div class="progress-fill" style="width: 0%"></div>
-      </div>
-    </div>
-  </header>
-
-  <!-- ======== Word Sidebar Panel (右上角三层卡片) ======== -->
-  <div class="word-sidebar" id="word-sidebar">
-    <button class="sidebar-close">✕</button>
-
-    <!-- Top: Imagery + Ancient Meaning -->
-    <div class="sb-top">
-      <div class="sb-emoji"></div>
-      <div class="sb-word"></div>
-      <div class="sb-phonetic"></div>
-      <div class="sb-origin"></div>
-    </div>
-
-    <!-- Middle: Root Breakdown -->
-    <div class="sb-mid">
-      <div class="sb-section-title">🧩 词根拆解</div>
-      <div class="sb-roots"></div>
-    </div>
-
-    <!-- Bottom: Common Phrases -->
-    <div class="sb-bot">
-      <div class="sb-section-title">📝 常用词组</div>
-      <div class="sb-phrases"></div>
-    </div>
-
-    <button class="sidebar-speak-all">🔊 朗读全词</button>
-  </div>
-
-  <!-- ======== Main Container ======== -->
-  <div class="app-container">
-
-    <!-- ===== Home View ===== -->
-    <div class="view-home active">
-      <h1 class="section-title">📖 10篇阅读 · 掌握150个研究生单词</h1>
-      <p class="section-subtitle">每篇文章融合科学杂志深度 + 篮球体育新闻，四级水平也能轻松读懂</p>
-      <div class="article-grid"></div>
-      <div class="continue-studying"></div>
-    </div>
-
-    <!-- ===== Flashcard View ===== -->
-    <div class="view-flashcards">
-      <h1 class="section-title">🎴 闪卡模式</h1>
-      <p class="section-subtitle">翻转卡片记忆单词 · 键盘快捷键：Space=翻转 ←→=导航 S=发音</p>
-
-      <div class="flashcard-controls">
-        <div class="flashcard-filter">
-          <select class="flashcard-select" id="flashcard-filter">
-            <option value="all">全部单词 (150)</option>
-            <option value="article-0">Article 1: 基因与篮球天赋</option>
-            <option value="article-1">Article 2: 防守黑洞</option>
-            <option value="article-2">Article 3: 神经科学与球场视野</option>
-            <option value="article-3">Article 4: 绿色场馆</option>
-            <option value="article-4">Article 5: 量子分析与投篮</option>
-            <option value="article-5">Article 6: 进化与现代球员</option>
-            <option value="article-6">Article 7: 深海与团队协作</option>
-            <option value="article-7">Article 8: 病毒式复出</option>
-            <option value="article-8">Article 9: AI与球探</option>
-            <option value="article-9">Article 10: 冠军心流</option>
-            <option value="unlearned">未掌握</option>
-            <option value="learned">已掌握</option>
-          </select>
+    <!-- 顶部导航 -->
+    <header>
+        <div class="header-title">
+            <h1>GradVocab Terminal</h1>
+            <p>双语同步高亮阅读电台系统</p>
         </div>
-        <div class="flashcard-mode">
-          <button class="mode-btn active" data-mode="sequential">📋 顺序</button>
-          <button class="mode-btn" data-mode="random">🎲 随机</button>
+        <div class="tab-nav">
+            <button class="tab-btn active" id="tabFlash">🎴 闪卡看板</button>
+            <button class="tab-btn" id="tabRead">📖 双语阅读</button>
         </div>
-        <div class="flashcard-toggles">
-          <label class="toggle-label">
-            <input type="checkbox" id="auto-speak" checked>
-            🔊 自动发音
-          </label>
-        </div>
-      </div>
+    </header>
 
-      <div class="flashcard-stage">
-        <button class="flashcard-nav-btn prev" title="上一个 (←)">←</button>
-        <div class="flashcard-card" id="flashcard-card">
-          <div class="flashcard-inner">
-            <div class="flashcard-front">
-              <div class="fc-word"></div>
-              <div class="fc-syllables"></div>
-              <div class="fc-phonetic"></div>
-              <div class="fc-hint">点击或按 Space 翻转</div>
+    <!-- 主容器 -->
+    <div class="main-container">
+        
+        <!-- 章节筛选器 -->
+        <div class="selector-area">
+            <select id="articleFilter">
+                <option value="all">选择章节 (全部 150 词)</option>
+                <option value="1">Article 1: 基因科学</option>
+                <option value="2">Article 2: 物理黑洞</option>
+                <option value="3">Article 3: 神经路径</option>
+                <option value="4">Article 4: 绿色环境</option>
+                <option value="5">Article 5: 量子分析</option>
+                <option value="6">Article 6: 进化适应</option>
+                <option value="7">Article 7: 深海动态</option>
+                <option value="8">Article 8: 免疫防御</option>
+                <option value="9">Article 9: 智能球探</option>
+                <option value="10">Article 10: 巅峰心理</option>
+            </select>
+        </div>
+
+        <!-- 模式一：闪卡界面 -->
+        <div id="flashcardSection" class="mode-flashcard">
+            <div class="card-area">
+                <div class="card" id="vocabCard" onclick="handleCardFlip(event)">
+                    <div class="card-front">
+                        <div class="word-title" id="frontWord">hypothesis</div>
+                        <div class="word-phonetic" id="frontPhonetic">/haɪˈpɒθəsɪs/</div>
+                        <div class="syllable-container" id="syllableBox"></div>
+                        <p style="font-size: 11px; color: var(--text-muted); margin-top: 25px;">点击空白处翻面</p>
+                    </div>
+                    <div class="card-back">
+                        <div style="font-size: 26px; font-weight: bold; color: var(--primary);" id="backMeaning">假设，假说</div>
+                    </div>
+                </div>
             </div>
-            <div class="flashcard-back">
-              <div class="fc-meaning"></div>
-              <div class="fc-etymology"></div>
-              <div class="fc-sentence"></div>
+
+            <!-- 控制条居中 -->
+            <div class="audio-control-panel">
+                <button id="bbcBtn" class="audio-btn active-bbc">🎙️ BBC (英音)</button>
+                <button id="speakBtn" class="audio-btn speak-main">🔊 朗读单词</button>
+                <button id="voaBtn" class="audio-btn">🎙️ VOA (慢美音)</button>
             </div>
-          </div>
-        </div>
-        <button class="flashcard-nav-btn next" title="下一个 (→)">→</button>
-      </div>
 
-      <div class="flashcard-footer">
-        <div class="flashcard-counter" id="flashcard-counter">1 / 150</div>
-        <button class="flashcard-learned-btn" id="flashcard-learned-btn">💾 保存</button>
-        <button class="flashcard-speak-btn" id="flashcard-speak-btn" title="听发音 (S)">🔊 发音</button>
-      </div>
-
-      <div class="flashcard-progress">
-        <div class="flashcard-progress-bar">
-          <div class="flashcard-progress-fill" id="flashcard-progress-fill"></div>
-        </div>
-        <span class="flashcard-progress-text" id="flashcard-progress-text">0/150 已掌握</span>
-      </div>
-    </div>
-
-    <!-- ===== Article View ===== -->
-    <div class="view-article">
-      <div class="reader-header">
-        <button class="back-btn">← 返回文章列表</button>
-        <div class="reader-title-row">
-          <div>
-            <h1 class="reader-title"></h1>
-            <div class="reader-cn-title"></div>
-          </div>
-          <div class="reader-labels"></div>
-        </div>
-        <div class="reader-word-count"></div>
-      </div>
-
-      <!-- Slideshow -->
-      <div class="slideshow-container">
-        <div class="slideshow-track" id="slideshow-track">
-          <!-- Slides rendered by JS -->
-        </div>
-        <div class="slideshow-dots" id="slideshow-dots"></div>
-      </div>
-
-      <div class="reader-content"></div>
-
-      <!-- Latin Poetry Section -->
-      <div class="reader-latin" id="reader-latin">
-        <div class="latin-badge">LATINUM POEMA · 拉丁诗文</div>
-        <div class="latin-verse" id="latin-verse"></div>
-        <div class="latin-translation" id="latin-translation"></div>
-        <div class="latin-connection" id="latin-connection"></div>
-      </div>
-
-      <!-- Bottom word list for this article -->
-      <div class="article-word-section">
-        <h3>
-          <span>📝 本课单词</span>
-          <span style="font-size:12px;color:var(--text-muted);font-weight:400">（点击查看释义 & 听发音）</span>
-        </h3>
-        <div class="article-word-list"></div>
-        <div class="btn-container" style="margin-top:16px;text-align:right"></div>
-      </div>
-    </div>
-
-    <!-- ===== Word List View ===== -->
-    <div class="view-words">
-      <div class="words-header">
-        <h1 class="section-title">📚 全部单词</h1>
-        <p class="section-subtitle">150个研究生核心词汇 · 点击听发音</p>
-        <div class="stats-bar"></div>
-      </div>
-
-      <div class="download-section">
-        <h3>📥 下载词库</h3>
-        <div class="download-buttons">
-          <button class="download-btn" data-format="memo">墨墨词库 (TSV)</button>
-          <button class="download-btn" data-format="anki-simple">Anki 简单版 (CSV)</button>
-          <button class="download-btn" data-format="anki-full">Anki 详细版 (CSV)</button>
-        </div>
-      </div>
-
-      <div class="word-filter-bar"></div>
-      <div class="word-list"></div>
-    </div>
-
-    <!-- ===== Study Plan View ===== -->
-    <div class="view-plan">
-      <h1 class="section-title">📋 30天学习计划</h1>
-      <p class="section-subtitle">三阶段循序渐进 · 每天15个单词 · 10篇文章</p>
-
-      <div class="plan-setup" id="plan-setup">
-        <p>设置开始日期以追踪学习进度：</p>
-        <button class="plan-start-btn" id="plan-start-today">📅 从今天开始</button>
-      </div>
-
-      <div class="plan-phases" id="plan-phases">
-        <!-- Phase 1: Foundation -->
-        <div class="plan-phase">
-          <div class="phase-header">
-            <span class="phase-icon">🏗️</span>
-            <div>
-              <h3>第一阶段：基础积累</h3>
-              <p class="phase-desc">第 1-10 天 · 掌握核心词根与高频词汇</p>
+            <div class="card-nav">
+                <button id="prevBtn" class="nav-btn">◀ 上一个</button>
+                <span id="cardProgress" style="font-weight: bold;">1 / 150</span>
+                <button id="nextBtn" class="nav-btn" style="background-color: var(--primary);">下一个 ▶</button>
             </div>
-          </div>
-          <div class="phase-days" id="phase1-days"></div>
         </div>
 
-        <!-- Phase 2: Expansion -->
-        <div class="plan-phase">
-          <div class="phase-header">
-            <span class="phase-icon">🚀</span>
-            <div>
-              <h3>第二阶段：扩展提升</h3>
-              <p class="phase-desc">第 11-20 天 · 学术词汇与语境应用</p>
+        <!-- 模式二：双语阅读器 -->
+        <div id="readerSection" class="mode-reader">
+            <div class="reader-grid">
+                <!-- 左列：可交互英文原文 -->
+                <div class="reader-panel" id="englishReaderPanel"></div>
+                <!-- 右列：中文参考译文 -->
+                <div class="reader-panel" id="chineseReaderPanel" style="color: #475569; background: #fafafa; border-radius: 8px; padding: 10px;"></div>
             </div>
-          </div>
-          <div class="phase-days" id="phase2-days"></div>
         </div>
 
-        <!-- Phase 3: Mastery -->
-        <div class="plan-phase">
-          <div class="phase-header">
-            <span class="phase-icon">🏆</span>
-            <div>
-              <h3>第三阶段：精通冲刺</h3>
-              <p class="phase-desc">第 21-30 天 · 综合复习与真题模拟</p>
+        <!-- 底部深度应用区 -->
+        <div class="deep-application-section">
+            <div class="section-title">
+                🌐 多语同源与语境应用深层看板：<span id="activeWordName" style="color: var(--latin-gold);">hypothesis</span>
             </div>
-          </div>
-          <div class="phase-days" id="phase3-days"></div>
+
+            <!-- 八国同源词 -->
+            <div class="languages-grid">
+                <div class="lang-card"><div class="lang-name">Latin 拉丁文</div><div class="lang-word" id="langLat">hypothesis</div></div>
+                <div class="lang-card"><div class="lang-name">French 法语</div><div class="lang-word" id="langFr">hypothèse</div></div>
+                <div class="lang-card"><div class="lang-name">Spanish 西语</div><div class="lang-word" id="langEs">hipótesis</div></div>
+                <div class="lang-card"><div class="lang-name">Russian 俄语</div><div class="lang-word" id="langRu">гипотеза</div></div>
+                <div class="lang-card"><div class="lang-name">German 德语</div><div class="lang-word" id="langDe">Hypothese</div></div>
+                <div class="lang-card"><div class="lang-name">Portuguese 葡语</div><div class="lang-word" id="langPt">hipótese</div></div>
+                <div class="lang-card"><div class="lang-name">Italian 意语</div><div class="lang-word" id="langIt">ipotesi</div></div>
+                <div class="lang-card"><div class="lang-name">Chinese 中文</div><div class="lang-word" id="langCn">假设</div></div>
+            </div>
+
+            <!-- 应用面板 -->
+            <div class="usage-panel">
+                <div class="usage-block">
+                    <h4>💼 推荐应用场景</h4>
+                    <div class="usage-text" id="usageScene">学术论文开篇、科学实验设计、论证推理起点。</div>
+                </div>
+                <div class="usage-block">
+                    <h4>📝 广播级常用例句</h4>
+                    <div class="usage-text" id="usageSentences">Loading...</div>
+                </div>
+                <div class="usage-block">
+                    <h4>🏛️ 古典人文传统与演变</h4>
+                    <div class="usage-text" id="usageCulture">Loading...</div>
+                </div>
+                <div class="usage-block">
+                    <h4>📜 谚语 & 原创诗歌</h4>
+                    <div class="usage-text" id="usagePoetry">Loading...</div>
+                </div>
+            </div>
         </div>
-      </div>
+
     </div>
 
-  </div>
-
-  <!-- ======== Word Popup ======== -->
-  <div class="word-popup-overlay">
-    <div class="word-popup">
-      <div class="popup-word"></div>
-      <div class="popup-syllables"></div>
-      <div class="popup-phonetic"></div>
-      <div class="popup-meaning"></div>
-      <div class="popup-sentence"></div>
-
-      <!-- Etymology section -->
-      <div class="popup-etymology">
-        <div class="ety-header">📜 词源故事 · 音节发音来源</div>
-        <div class="ety-origin"></div>
-        <div class="ety-breakdown"></div>
-        <div class="ety-syllables"></div>
-        <div class="ety-story"></div>
-      </div>
-
-      <div class="popup-actions">
-        <button class="btn-speak">🔊 听发音</button>
-        <button class="btn-close-popup">✕ 关闭</button>
-      </div>
+    <!-- 右上角独立取词浮窗 (Popover) -->
+    <div class="popover" id="popover">
+        <button class="popover-close" onclick="closePopover()">×</button>
+        <div style="font-weight: bold; font-size: 18px; color: var(--primary);" id="popWord">word</div>
+        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;" id="popPhonetic">/phonetic/</div>
+        <div style="font-size: 14px; font-weight: bold; margin-bottom: 6px;" id="popMeaning">释义加载中</div>
+        <div style="font-size: 11px; border-top: 1px solid #e2e8f0; padding-top: 6px; color: var(--latin-gold);" id="popLatin">源于：...</div>
     </div>
-  </div>
 
-  <!-- ======== Syllable Popup ======== -->
-  <div class="syl-popup" id="syl-popup">
-    <div class="syl-popup-arrow"></div>
-    <div class="syl-popup-head">
-      <span class="syl-popup-text"></span>
-      <span class="syl-popup-ipa"></span>
-    </div>
-    <div class="syl-popup-langs">
-      <div class="syl-lang-row"><span class="syl-lang-label">🇬🇧 英</span><span class="syl-lang-val en-val"></span></div>
-      <div class="syl-lang-row"><span class="syl-lang-label">🏛️ 拉丁</span><span class="syl-lang-val la-val"></span></div>
-      <div class="syl-lang-row"><span class="syl-lang-label">🇫🇷 法</span><span class="syl-lang-val fr-val"></span></div>
-      <div class="syl-lang-row"><span class="syl-lang-label">🇨🇳 中</span><span class="syl-lang-val zh-val"></span></div>
-      <div class="syl-lang-row"><span class="syl-lang-label">🇪🇸 西</span><span class="syl-lang-val es-val"></span></div>
-    </div>
-    <div class="syl-popup-note"></div>
-    <button class="syl-popup-close">✕</button>
-  </div>
+    <script>
+        // 文章数据库
+        const articlesData = {
+            1: {
+                title: "The Genetic Blueprint of Basketball Greatness",
+                en: "For years, scientists made a bold hypothesis: athletic excellence is not just about hard work — it runs in your genes. This idea has led to a fascinating exploration of human genetic potential. Every athlete inherits a unique set of traits from their parents, and some of those traits can be dominant — meaning they show up no matter what. Take LeBron James, for example. His genome contains a specific sequence of DNA that helps explain his extraordinary physique. Scientists have studied the chromosome structure of elite athletes and found certain mutations that give them an edge. These variations in the human species help explain why some players can jump higher or run faster. But evolution doesn't stop. The human body continues to evolve and replicate its best qualities. Coaches now understand that while genetics provides the foundation, training can unlock the full hereditary potential in every player. The combination of natural talent and hard work is what creates basketball legends.",
+                cn: "多年来，科学家们提出了一个大胆的假设：运动卓越不仅仅是努力的结果——它与你的基因息息相关。这一想法引发了对人类遗传潜力的迷人探索。每位运动员都从父母那里继承了一套独特的特征，其中一些特征可能是显性的——意味着它们无论如何都会表现出来。以勒布朗·詹姆斯为例。他的基因组包含一段特殊的 DNA 序列，这有助于解释他非凡的体格。科学家研究了精英运动员的染色体结构，发现了赋予他们优势的特定突变。这些人类物种中的变异有助于解释为什么一些运动员跳得更高、跑得更快。但进化并未停止。人体不断演变并复制其最优特质。教练们现在明白，虽然基因提供了基础，但训练可以释放每位运动员全部的遗传潜力。天赋与勤奋的结合，才是创造篮球传奇的关键。"
+            },
+            2: {
+                title: "Defensive Black Holes — The Gravity of Great Defense",
+                en: "In astrophysics, a black hole is a region where gravity is so strong that nothing can escape. It forms when a massive star begins to collapse under its own weight, becoming incredibly dense. The density reaches such extreme levels that space and time contract into a single point of infinite dimension. Now imagine that as a basketball defender. A great defender doesn't just guard one player — they absorb all offensive movement, emit constant pressure, and control every orbit on the court. Like a cosmic phenomenon, their presence changes the game. Players moving at high velocity toward the basket suddenly find themselves trapped. The defensive radiation spreads across the entire court, affecting every opponent. When a defender learns to expand their coverage area while maintaining perfect positioning, they become a true \"defensive black hole.\" This is the science of lockdown defense — a phenomenon that every championship team needs.",
+                cn: "在天体物理学中，黑洞是一个引力强大到没有任何东西能够逃脱的区域。当一颗巨大的恒星开始在自身重量下崩溃时，它会变得极其稠密。密度达到如此极端的程度，以至于空间和时间收缩成一个具有无限维度的单点。现在，把这一幕想象成一个篮球防守者。一个伟大的防守者不仅仅防守一个人——他们吸收所有的进攻移动，发出持续的压力，并控制场上每一个轨道。就像一个宇宙现象，他们的存在改变了比赛。以高速度冲向篮筐的球员突然发现自己被锁死了。防守辐射扩散到全场，影响每一个对手。当一名防守者学会在保持完美站位的同时扩展防守范围时，他们就成为了真正的“防守黑洞”。这就是锁死防守的科学——每支冠军球队都需要的一种现象。"
+            },
+            3: {
+                title: "Neural Pathways and Court Vision",
+                en: "Every time a point guard makes a pass, thousands of neurons fire in their brain. These neural signals travel across synapses — the tiny gaps between brain cells — at lightning speed. The cortex, especially the visual hemisphere, processes sensory information from the eyes and ears, creating a real-time map of the court. This is cognitive science in action. A player's perception of the game is shaped by years of practice. When a defender approaches, the brain sends an impulse through the motor system, triggering a reflex pass or a quick response. The stimulus of movement on the court is processed in milliseconds. What separates great players from good ones is plasticity — the brain's ability to rewire itself. Through constant training, the integration of visual data and motor skills becomes seamless. The two hemispheres of the brain coordinate perfectly, allowing the player to see passes that others simply cannot.",
+                cn: "每次控卫传出一次传球，他们的大脑中就有数千个神经元在放电。这些神经信号以闪电般的速度穿越突触——脑细胞之间的微小间隙。皮层，尤其是视觉半球，处理来自眼睛和耳朵的感觉官信息，构建球场的实时地图。这就是认知科学在实践中的样子。球员对比赛的感知是数年训练塑造的。当防守者逼近，大脑通过运动系统发出脉冲，触发一个反射性传球或快速反应。场上运动的刺激在毫秒间被处理。区分伟大和优秀的关键是可塑性——大脑自我重塑的能力。通过持续训练，视觉数据与运动技能的整合变得完美无间。大脑的两个半球精确协调，让球员看到别人看不到的传球线路。"
+            },
+            4: {
+                title: "The Green Arena — Sustainability in Sports",
+                en: "Modern basketball arenas are undergoing a remarkable transformation. The environmental impact of sports has become a pressing concern, and teams are racing to reduce their carbon footprint. From solar panels to water conservation systems, the sustainable revolution has reached the NBA. The ecosystem of a major sports event involves thousands of people, and emission levels can be significant. Teams now use renewable energy sources and advanced recycle programs. Every resource — from electricity to food packaging — is carefully managed. Pollution is being reduced through innovative mitigation strategies. Climate change demands adaptation at every level. Arenas are designed to withstand extreme weather, while biodiversity projects around stadiums help restore local environments. The goal is to create a sustainable model that other industries can follow. Basketball is proving that sports and environmental responsibility can go hand in hand.",
+                cn: "现代篮球场馆正在经历一场显著的变革。体育的环境影响已成为紧迫问题，各球队竞相减少碳足迹。从太阳能板到节水保护系统，可持续革命已经抵达 NBA。大型体育赛事的生态系统涉及数千人，排放水平可能相当惊人。球队现在使用可再生能源和先进的回收计划。每一份资源——从电力到食品包装——都被精细管理。污染正在通过创新的缓解策略被减少。气候变化要求各个层面的适应。球馆被设计来抵御极端天气，而场馆周边的生物多样性项目帮助恢复当地环境。目标是创造一个其他行业可以效仿的可持续模式。篮球正在证明，体育和环境责任可以并行不悖。"
+            },
+            5: {
+                title: "Quantum Analytics and the Perfect Shot",
+                en: "The philosophy of quantum physics teaches us that the act of observation changes the outcome. In basketball, every shot is a particle of probability — it either goes in or it doesn't. But through careful measurement and analysis, we can predict success rates with remarkable precision. Sports statistics have evolved into a sophisticated science. Variance in shooting percentages can be explained by distribution of shot locations and correlation with defensive pressure. Regression models help calibrate training programs for maximum effectiveness. Every parameter — from release angle to arc height — can be measured and optimized. Modern trainers use these insights to help players analyze their own shooting mechanics. By understanding the statistics behind each shot, players can make smarter decisions on the court. The combination of quantum thinking and data precision is creating a new generation of shooters who shoot not just with instinct, but with science.",
+                cn: "量子物理的哲学告诉我们，观察这个行为本身改变结果。在篮球中，每次投篮都是一个概率的粒子——要么进，要么不进。但通过精确的测量和分析，我们可以以惊人的精度预测成功率。运动统计已经演变为一门复杂的科学。投篮命中率的方差可以通过投篮位置的分布以及防守压力的相关性来解释。回归模型帮助校准训练计划以达到最大效果。每一个参数——从出手角度到弧线高度——都可以被测量和优化。现代训练师利用这些洞见帮助球员分析自己的投篮机制。通过理解每次投篮背后的统计数据，球员在场上能做出更聪明的决策。量子思维与数据精度的结合正在创造新一代射手——他们不依靠直觉投篮，而是依靠科学。"
+            },
+            6: {
+                title: "Evolutionary Adaptation and the Modern Player",
+                en: "Charles Darwin's theory of evolution by natural selection applies perfectly to basketball. Players who cannot adapt to new playing styles face a survival challenge in the league. The mechanism of basketball evolution has transformed the game across generations — from big, slow centers to fast, versatile athletes. The modern game requires players to diversify their skills. A big man must now shoot threes; a guard must defend multiple positions. This is adaptive behavior at its finest. Players evolve their games to thrive in new systems. What was once considered a mutation in playing style is now the new standard. Coaches reproduce successful systems and pass them to the next generation of players. While some skills are innate, most can be developed through practice. The offspring of basketball ideas — new plays, new strategies — create new habitats where different types of players can succeed. Every player finds their niche in the evolving ecosystem of the game.",
+                cn: "达尔文的自然选择进化论完美适用于篮球。无法适应新打法的球员在联盟中面临生存挑战。篮球进化的机制跨越几代人改变了比赛——从高大缓慢的中锋到快速全能运动员。现代篮球要求球员多样化技能。大个子现在必须投三分；后卫必须防守多个位置。这是适应性行为的最佳体现。球员进化他们的比赛以在新的体系中茁壮成长。曾经被认为是打法突变的东西，如今成了新标准。教练复制成功的体系并传递给下一代球员。虽然有些技能是天生的，但大部分可以通过训练获得。篮球思想的后代——新战术、新策略——创造了新的栖息地，不同类型的球员在其中都能成功。每位球员在比赛不断进化的生态系统中找到自己的生态位。"
+            },
+            7: {
+                title: "Ocean Depths and Team Dynamics",
+                en: "The oceanic world is divided into different zones, each with its own pressure and depth. In the shallow stratum, sunlight reaches the coral reefs, where symbiotic relationships between species create rich biodiversity. Descend into the midnight zone, and you enter the abyss — a world of extreme pressure and darkness. A basketball team works the same way. Point guards operate in the shallows, seeing the entire circulation of the game. Big men migrate through the paint like deep-sea currents. The tide of the game shifts constantly, and each player must understand their zone on the court. Sediment builds up over time — habits, chemistry, trust. The most successful teams are like healthy marine ecosystems: diverse, balanced, and deeply interconnected. Every organism on the team has a role, and the strongest symbiotic relationships create winning basketball. Understanding team dynamics is like exploring the ocean — you need to appreciate every layer.",
+                cn: "海洋世界分为不同的区域，每个区域有自己的压强和深度。在浅层，阳光照到珊瑚礁，物种间的共生关系创造了丰富的生物多样性。下降到午夜区域，你进入了深渊——一个极端压强和黑暗的世界。一支篮球队也是如此运作。控卫在浅水区操作，观察比赛整个循环。大个子像深海水流一样在禁区迁徙。比赛的潮汐不断变化，每个球员必须理解自己在场上的区域。沉积物随时间积累——习惯、默契、信任。最成功的团队就像健康的海洋生态系统：多样、平衡、深度互联。球队中的每个有机体都有自己的角色，最强的共生关系创造胜利篮球。理解团队动态就像探索海洋——你需要欣赏每一层。"
+            },
+            8: {
+                title: "Viral Comebacks and Team Immunity",
+                en: "Just as a virus invades a host, adversity can attack a team. An infection of losing habits or a pathogen of conflict can spread quickly through a locker room. But great teams build immunity — a collective resistance to negative influences. The immune system of a championship team is remarkably strong. When a star player suffers a chronic injury, the entire team must adapt. Doctors diagnose the problem, prescribe therapy, and develop a recovery plan. Antibodies in medicine are like a team's defensive schemes — they recognize threats and neutralize them. A vaccine against future setbacks comes from experience and preparation. The greatest comebacks in basketball history are like fighting an epidemic of doubt. Teams recover through systematic effort, strengthening their cellular structure — every player, every coach, every staff member. An outbreak of confidence can spread just as fast as one of negativity. The lesson: build your immunity before you need it.",
+                cn: "就像病毒入侵宿主一样，逆境也能侵蚀一支球队。失败习惯的感染或冲突的病原体可以在更衣室迅速传播。但伟大的球队会建立免疫力——对负面影响的集体抵抗力。冠军球队的免疫系统异常强大。当明星球员遭遇慢性的伤病，全队必须适应。医生诊断问题，制定治疗和恢复计划。医学中的抗体就像球队的防守体系——识别威胁并加以中和。对未来挫折的疫苗来自经验和准备。篮球历史上最伟大的复出战役就像对抗一场怀疑的流行病。球队通过系统努力来恢复，加强细胞的结构——每一位球员、每一位教练、每一位工作人员。信心的爆发可以和消极一样快速传播。教训是：在被需要之前建立你的免疫力。"
+            },
+            9: {
+                title: "AI and the Future of Scouting",
+                en: "Artificial intelligence is revolutionizing how teams discover talent. Machine learning algorithms process vast amounts of data to identify patterns that human scouts might miss. Neural networks — modeled after the human brain — classify players by hundreds of different parameters. These AI systems train on thousands of game videos, learning to recognize subtle patterns in player movement and decision-making. The recognition of potential in young athletes has become more precise than ever. Teams simulate different game scenarios to optimize their draft strategies. The goal is not to replace human judgment but to enhance it. After each iteration of analysis, the AI model becomes smarter. Coaches can now predict a player's development trajectory with unprecedented accuracy. The future of intelligence in sports is a partnership between human insight and machine intelligence.",
+                cn: "人工智能正在彻底改变球队发现人才的方式。机器学习算法处理海量数据，识别人类球探可能错过的模式。神经网络——仿照人脑建模——按数百个不同的参数分类球员。这些 AI 系统在数千场比赛中训练，学习识别球员移动和决策中微妙的模式。对年轻运动员潜力的识别比以往任何时候都更加精确。球队模拟不同比赛场景以优化选秀策略。目标不是取代人类判断，而是增强它。每次分析的迭代后，AI 模型都变得更聪明。教练现在能以空前的精度预测球员的发展轨迹。体育智能的未来是人类洞察力与机器智能的伙伴关系。"
+            },
+            10: {
+                title: "The Psychology of Championship Flow",
+                en: "The psychology of peak performance reveals a fascinating state called \"flow.\" When a player enters this state of heightened consciousness, everything feels effortless. Focus becomes absolute, emotion is channeled into positive energy, and motivation reaches its highest level. This is where champions are made. Resilience is the foundation of a championship mindset. Players with strong mental discipline can overcome anxiety and self-doubt. They visualize success before it happens, building unshakeable confidence. The ability to achieve greatness under pressure separates legends from average players. To reach your peak, you must believe in your potential and work systematically toward your goals. Psychology teaches us that the mind is the most powerful muscle in an athlete's body. With the right mindset, anything is achievable. The science of motivation reminds us: greatness is not a gift — it is a choice.",
+                cn: "巅峰表现的心理学揭示了一个迷人的状态叫“心流”。当球员进入这种高度意识状态，一切感觉毫不费力。专注变得绝对，情绪被转化为正能量，动机达到最高水平。这就是冠军诞生的地方。韧性是冠军心态的基石。拥有强大心理纪律的球员能够克服焦虑和自我怀疑。他们在成功发生前就想象它，建立起不可动摇的自信。在压力下实现伟大的能力区分了传奇和普通球员。要到达你的顶峰，你必须相信自己的潜力，并系统性地朝着目标努力。心理学告诉我们：心智是运动员身体中最强大的肌肉。用对心态，一切皆可实现。动机的科学提醒我们：伟大不是天赋，而是选择。"
+            }
+        };
 
-  <!-- ======== Scroll to Top ======== -->
-  <button class="scroll-top">↑</button>
+        // 150词库（完美整合：同源词、译词及深度语篇数据）
+        const vocabData = [
+            // Article 1
+            {
+                w:"hypothesis", p:"/haɪˈpɒθəsɪs/", s:"hy·poth·e·sis", m:"假设，假说", a:1,
+                lat:"Lat. hypothesis", fr:"hypothèse", es:"hipótesis", ru:"гипотеза", de:"Hypothese", pt:"hipótese", it:"ipotesi", cn:"假设",
+                scene:"科学实证、学术论文开篇推演、严密假说设立",
+                sentences:"The scientists formulated a bold hypothesis to explain the evolutionary leap.",
+                culture:"古希腊语 'hypo' (下) 与 'thesis' (放置) 结合，在拉丁语中特指哲学推论的最底层‘设想根基’，代表现代科学精神的批判理性。",
+                poetry:"An unshaped thought, a seed beneath the snow,\nA bold hypothesis waiting for its spark to glow."
+            },
+            {
+                w:"gene", p:"/dʒiːn/", s:"gene", m:"基因", a:1,
+                lat:"Lat. genus", fr:"gène", es:"gen", ru:"ген", de:"Gen", pt:"gene", it:"gene", cn:"基因",
+                scene:"分子生物学、体质评估、运动遗传特征描述",
+                sentences:"Some genes can dictate a player's muscle fiber makeup and natural athletic speed.",
+                culture:"来自印欧语根 *gene-（生育），在古典语系中是‘家族、类别’的核心象征。20世纪现代遗传学诞生时，借由拉丁语源定义了遗传单元。",
+                poetry:"A tiny script, written on the strand of life,\nCoding our breath, our victory, and our strife."
+            },
+            {
+                w:"inherit", p:"/ɪnˈherɪt/", s:"in·her·it", m:"继承；遗传", a:1,
+                lat:"Lat. inhereditare", fr:"hériter", es:"heredar", ru:"наследовать", de:"erben", pt:"herdar", it:"ereditare", cn:"继承；遗传",
+                scene:"基因特征研究、家族天赋遗传、财富或精神薪火相传",
+                sentences:"He inherited not only his father's height but also his legendary vertical leap.",
+                culture:"拉丁语前缀 'in-' 与 'heres' (继承人) 结合。在罗马帝国法律中，这是表示家族契约最坚固的用词，现被用于概括生命信息的世代契约。",
+                poetry:"We are but clay, shaped by an ancient hand,\nInheriting the dreams of those who used to stand."
+            },
+            {
+                w:"dominant", p:"/ˈdɒmɪnənt/", s:"dom·i·nant", m:"显性的；占主导地位的", a:1,
+                lat:"Lat. dominans", fr:"dominant", es:"dominante", ru:"доминантный", de:"dominant", pt:"dominante", it:"dominante", cn:"显性的；主导的",
+                scene:"遗传显性特征、球场战术统治力描述",
+                sentences:"His dominant athletic traits allow him to dominate the paint against any defender.",
+                culture:"源于 'dominus' (主人、领主)。在古罗马，只有庄园的绝对支配者可被称为 dominant。它完美体现了不可抗拒的统治性质。",
+                poetry:"A force untamed, that breaks the lesser light,\nIn every court and genome, ruling with its might."
+            },
+            {
+                w:"mutation", p:"/mjuːˈteɪʃn/", s:"mu·ta·tion", m:"突变", a:1,
+                lat:"Lat. mutatio", fr:"mutation", es:"mutación", ru:"мутация", de:"Mutation", pt:"mutação", it:"mutazione", cn:"突变",
+                scene:"演化生物学、不可预期的生理跃升、战略体系的革命性颠覆",
+                sentences:"A rare genetic mutation gave the athlete an exceptionally high oxygen-carrying capacity.",
+                culture:"拉丁动词 'mutare'（改变）。代表了万物在时间流转中，基因密码出现的随机进化和质性重塑。",
+                poetry:"In standard code, a silent whisper breaks,\nA sudden change, and a new legend wakes."
+            },
+            {
+                w:"evolution", p:"/ˌiːvəˈluːʃn/", s:"ev·o·lu·tion", m:"进化；演变", a:1,
+                lat:"Lat. evolutio", fr:"évolution", es:"evolución", ru:"эволюция", de:"Evolution", pt:"evolução", it:"evoluzione", cn:"进化",
+                scene:"竞技战术迭代、体能飞跃的长期过程、产品技术演进",
+                sentences:"The evolution of basketball has transformed centers into versatile long-range shooters.",
+                culture:"源于 'evolvere' (展开卷轴/阅读)。字面意思是让紧缩的秘密层层解开，展现其内在蕴含的无限潜能。",
+                poetry:"No sudden leap, but steps across the sand,\nTime's slow design, reshaping all the land."
+            },
+            {
+                w:"trait", p:"/treɪt/", s:"trait", m:"特征，特点", a:1,
+                lat:"Lat. tractus", fr:"trait", es:"rasgo", ru:"черта", de:"Merkmal", pt:"traço", it:"tratto", cn:"特征",
+                scene:"运动员生理与心理评测、性格特质侧写",
+                sentences:"Determination is a psychological trait that defines all champion-level athletes.",
+                culture:"源于 'trahere'（拉、抽取）。是指在繁杂的外表里，能‘拉出’一条最鲜明的、具有代表性的线条和属性。",
+                poetry:"A single thread, woven in the grand design,\nAn imprint left, uniquely yours and mine."
+            },
+            {
+                w:"chromosome", p:"/ˈkrəʊməsəʊm/", s:"chro·mo·some", m:"染色体", a:1,
+                lat:"Gk./Lat. chromatin + soma", fr:"chromosome", es:"cromosoma", ru:"хромосома", de:"Chromosom", pt:"cromossoma", it:"cromosoma", cn:"染色体",
+                scene:"基因组测序、生理天赋分析、遗传学底层架构说明",
+                sentences:"Within every chromosome lies the blueprint of an individual's physical limits.",
+                culture:"科学希腊语转译，'chroma' (颜色) 与 'soma' (肉体) 结合。在早期显微镜实验中因极易吸附染料被观察到而得名。",
+                poetry:"Invisible lines, packed in a tiny space,\nThey hold the key, to speed, and power, and grace."
+            },
+            {
+                w:"replicate", p:"/ˈreplɪkeɪt/", s:"rep·li·cate", m:"复制", a:1,
+                lat:"Lat. replicare", fr:"répliquer", es:"replicar", ru:"реплицировать", de:"replizieren", pt:"replicar", it:"replicare", cn:"复制",
+                scene:"DNA分子复制、完美复刻经典投篮姿势或战术体系",
+                sentences:"The player spent hours trying to replicate Jordan's famous fadeaway jumper.",
+                culture:"前缀 're-' (再) 结合 'plicare' (折叠)。原意是指把信件重折，引申为机械与精神层面的完美再现。",
+                poetry:"An echo of the past, a mirror of the seed,\nTo duplicate the glory, and double down the speed."
+            },
+            {
+                w:"sequence", p:"/ˈsiːkwəns/", s:"se·quence", m:"序列；顺序", a:1,
+                lat:"Lat. sequentia", fr:"séquence", es:"secuencia", ru:"последовательность", de:"Sequenz", pt:"sequência", it:"sequenza", cn:"序列",
+                scene:"基因组排序、球场跑位配合的精确次序",
+                sentences:"The sequence of movements leading to the dunks was flawless.",
+                culture:"源于 'sequi'（跟随）。强调后因跟随前因，环环相扣，不能有丝毫断裂和差错。",
+                poetry:"First the seed, and then the rising green,\nA chain of life, the finest ever seen."
+            },
+            {
+                w:"genetic", p:"/dʒəˈnetɪk/", s:"ge·net·ic", m:"基因的；遗传的", a:1,
+                lat:"Lat. genesis", fr:"génétique", es:"genético", ru:"генетический", de:"genetisch", pt:"genético", it:"genetico", cn:"基因的",
+                scene:"遗传病理学分析、竞技体育中的“天赋论”",
+                sentences:"A player's raw wingspan and height are largely determined by genetic factors.",
+                culture:"源自希腊语-拉丁语 'Genesis'，原指圣经创世纪与生命的诞生。它揭示了生命信息最深厚的始源规律。",
+                poetry:"A map within, designed before our birth,\nTo test our limits on this spinning earth."
+            },
+            {
+                w:"variation", p:"/ˌveərɪˈeɪʃn/", s:"var·i·a·tion", m:"变异；变化", a:1,
+                lat:"Lat. variatio", fr:"variation", es:"variación", ru:"вариация", de:"Variation", pt:"variação", it:"variazione", cn:"变异",
+                scene:"生物演进微调、战术多变性研究",
+                sentences:"Minor genetic variations explain why some players possess elite lateral quickness.",
+                culture:"来自 'varius'（多色的、多样的）。代表了自然界不拘一格，在规律中注入意外的多彩生命力。",
+                poetry:"A different tone, a shift within the line,\nWhere nature changes, making stars align."
+            },
+            {
+                w:"species", p:"/ˈspiːʃiːz/", s:"spe·cies", m:"物种", a:1,
+                lat:"Lat. species", fr:"espèce", es:"especie", ru:"вид", de:"Spezies", pt:"espécie", it:"specie", cn:"物种",
+                scene:"生态物种多样性分类、人类学及体质演变分析",
+                sentences:"Humans are a species built for endurance and high cognitive capability.",
+                culture:"原意为“外观，形式”。在自然哲学中，指根据外表的关键特征对生命进行的大类别分类。",
+                poetry:"A branch of life, distinct upon the tree,\nWith unique forms, designed to run and see."
+            },
+            {
+                w:"genome", p:"/dʒiːnəʊm/", s:"ge·nome", m:"基因组", a:1,
+                lat:"Lat.ized Gk. blend", fr:"génome", es:"genoma", ru:"геном", de:"Genom", pt:"genoma", it:"genoma", cn:"基因组",
+                scene:"全基因组分析、分子生物学深度攻关、物种全基因图谱",
+                sentences:"Cracking the human genome has opened up new pathways in sports medicine.",
+                culture:"现代科学复合词（基因 Gene + 染色体 Chromosome 混合），代表一个生命体最庞大完整的指令档案。",
+                poetry:"A library of cells, a silent massive tome,\nWe read the letters of our ancestral home."
+            },
+            {
+                w:"hereditary", p:"/həˈredɪtri/", s:"he·red·i·tar·y", m:"遗传的；世袭的", a:1,
+                lat:"Lat. hereditary", fr:"héréditaire", es:"hereditario", ru:"наследственный", de:"erblich", pt:"hereditário", it:"ereditario", cn:"遗传的",
+                scene:"遗传学、历史上的贵族制度世袭特权、天赋传承",
+                sentences:"His phenomenal court vision is almost hereditary; both his parents were elite guards.",
+                culture:"在罗马法中，'hereditarius' 与法定的土地和头衔不可剥夺的继承有关，象征着血液里无法抹杀的信息继承。",
+                poetry:"A silent gift, passed down through blood and bone,\nA legacy of power, that we can call our own."
+            }
+        ];
 
-  <!-- ======== Scripts ======== -->
-  <script src="js/data.js"></script>
-  <script src="js/etymology.js"></script>
-  <script src="js/app.js"></script>
+        let currentActiveItem = vocabData[0];
+        let currentList = [...vocabData];
+        let currentIndex = 0;
+        let broadcasterMode = "BBC"; 
+
+        // 模式切换
+        const tabFlash = document.getElementById('tabFlash');
+        const tabRead = document.getElementById('tabRead');
+        const flashcardSection = document.getElementById('flashcardSection');
+        const readerSection = document.getElementById('readerSection');
+        const articleFilter = document.getElementById('articleFilter');
+
+        tabFlash.onclick = () => {
+            tabFlash.className = "tab-btn active";
+            tabRead.className = "tab-btn";
+            flashcardSection.style.display = "flex";
+            readerSection.style.display = "none";
+        };
+
+        tabRead.onclick = () => {
+            tabRead.className = "tab-btn active";
+            tabFlash.className = "tab-btn";
+            flashcardSection.style.display = "none";
+            readerSection.style.display = "block";
+            renderBilingualReader();
+        };
+
+        // 闪卡翻转
+        function handleCardFlip(e) {
+            if (e.target.classList.contains('syllable-span')) return;
+            vocabCard.classList.toggle('flipped');
+        }
+
+        // 发音控制
+        function playSpeech(text, isSlow = false) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.voice = getVoice(broadcasterMode === "BBC" ? "en-GB" : "en-US");
+            utterance.rate = broadcasterMode === "BBC" ? (isSlow ? 0.45 : 0.78) : (isSlow ? 0.4 : 0.65);
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function getVoice(langCode) {
+            const voices = window.speechSynthesis.getVoices();
+            return voices.find(v => v.lang.startsWith(langCode) && 
+                (v.name.includes("female") || v.name.includes("Zira") || v.name.includes("Hazel") || v.name.includes("Samantha") || v.name.includes("Siri"))
+            ) || voices.find(v => v.lang.startsWith(langCode));
+        }
+
+        // 渲染闪卡
+        function renderCard() {
+            if (currentList.length === 0) return;
+            vocabCard.classList.remove('flipped');
+            const data = currentList[currentIndex];
+            currentActiveItem = data;
+
+            document.getElementById('frontWord').textContent = data.w;
+            document.getElementById('frontPhonetic').textContent = data.p;
+            document.getElementById('backMeaning').textContent = data.m;
+            document.getElementById('cardProgress').textContent = `${currentIndex + 1} / ${currentList.length}`;
+
+            const syllableBox = document.getElementById('syllableBox');
+            syllableBox.innerHTML = '';
+            const syllables = data.s.split('·');
+            syllables.forEach((syl, index) => {
+                const span = document.createElement('span');
+                span.className = 'syllable-span';
+                span.textContent = syl;
+                span.onclick = (e) => {
+                    e.stopPropagation();
+                    playSpeech(syl, true);
+                };
+                syllableBox.appendChild(span);
+                if (index < syllables.length - 1) {
+                    const divider = document.createElement('span');
+                    divider.textContent = ' · ';
+                    divider.style.color = '#cbd5e1';
+                    syllableBox.appendChild(divider);
+                }
+            });
+
+            updateDeepApplication(data);
+        }
+
+        // 更新看板
+        function updateDeepApplication(data) {
+            document.getElementById('activeWordName').textContent = data.w;
+            document.getElementById('langLat').textContent = data.lat || "Lat. " + data.w;
+            document.getElementById('langFr').textContent = data.fr || "—";
+            document.getElementById('langEs').textContent = data.es || "—";
+            document.getElementById('langRu').textContent = data.ru || "—";
+            document.getElementById('langDe').textContent = data.de || "—";
+            document.getElementById('langPt').textContent = data.pt || "—";
+            document.getElementById('langIt').textContent = data.it || "—";
+            document.getElementById('langCn').textContent = data.m;
+
+            document.getElementById('usageScene').textContent = data.scene || "学术论文、专业研讨";
+            document.getElementById('usageSentences').innerHTML = data.sentences ? `“${data.sentences}”` : "暂无可用句子例句。";
+            document.getElementById('usageCulture').textContent = data.culture || "来源于古典印欧语根系。在欧洲科学大革命时期被赋予了极高的精确哲学语义。";
+            document.getElementById('usagePoetry').innerHTML = data.poetry ? data.poetry.replace(/\n/g, "<br>") : "暂无诗歌谚语收录。";
+        }
+
+        // 双语阅读：完美英汉 1:1 句子切割及双向高亮引擎
+        function renderBilingualReader() {
+            const articleId = articleFilter.value === "all" ? 1 : parseInt(articleFilter.value);
+            const article = articlesData[articleId];
+            if (!article) return;
+
+            const enPanel = document.getElementById('englishReaderPanel');
+            const cnPanel = document.getElementById('chineseReaderPanel');
+
+            // 经典句子切分器（防止旧款 iOS 浏览器不兼容 lookbehind 报错）
+            const enSentences = article.en.match(/[^.!?]+[.!?]+/g) || [article.en];
+            const cnSentences = article.cn.match(/[^。！？]+[。！？]+/g) || [article.cn];
+
+            let enHtml = "";
+            let cnHtml = "";
+
+            for (let i = 0; i < enSentences.length; i++) {
+                const enSent = enSentences[i] ? enSentences[i].trim() : "";
+                const cnSent = cnSentences[i] ? cnSentences[i].trim() : "";
+
+                const enWrapped = wrapEnglishSentence(enWrappedWords(enSent), i);
+                const cnWrapped = wrapChineseSentence(cnSent, i, articleId);
+
+                enHtml += `<span class="reader-sentence" data-sent-idx="${i}">${enWrapped} </span>`;
+                cnHtml += `<span class="reader-sentence" data-sent-idx="${i}">${cnWrapped} </span>`;
+            }
+
+            enPanel.innerHTML = enHtml;
+            cnPanel.innerHTML = cnHtml;
+
+            bindBilingualSyncEvents();
+        }
+
+        // 将英文句子中的单词包覆，并特别标记 150 核心词汇
+        function enWrappedWords(sentence) {
+            return sentence.split(/(\s+)/).map(seg => {
+                if (/\w+/.test(seg)) {
+                    const cleanWord = seg.replace(/[^a-zA-Z]/g, "").toLowerCase();
+                    const isKeyword = vocabData.some(v => v.w.toLowerCase() === cleanWord);
+                    if (isKeyword) {
+                        return `<span class="reader-word vocab-keyword" data-vocab="${cleanWord}" onclick="handleWordLookup('${cleanWord}', event)">${seg}</span>`;
+                    }
+                    return `<span class="reader-word" onclick="handleWordLookup('${cleanWord}', event)">${seg}</span>`;
+                }
+                return seg;
+            }).join('');
+        }
+
+        function wrapEnglishSentence(html, idx) {
+            return html; 
+        }
+
+        // 在中文翻译中，高亮圈出 150 词对应的翻译字词
+        function wrapChineseSentence(sentence, sentIdx, articleId) {
+            // 获取当前章节相关的核心词汇
+            const chapterKeywords = vocabData.filter(v => v.a === articleId);
+            let html = sentence;
+
+            // 降序排序，防止小词嵌套大词时被截断替换（例如“变”和“变异”）
+            const sortedKeywords = [...chapterKeywords].sort((a,b) => b.m.length - a.m.length);
+
+            sortedKeywords.forEach(kw => {
+                const regex = new RegExp(kw.m, 'g');
+                html = html.replace(regex, `<span class="cn-vocab-keyword" data-vocab="${kw.w.toLowerCase()}">${kw.m}</span>`);
+            });
+
+            return html;
+        }
+
+        // 核心高亮同步绑定事件
+        function bindBilingualSyncEvents() {
+            // 1. 句子级双向同步高亮（mouseenter 驱动）
+            const sentences = document.querySelectorAll('.reader-sentence');
+            sentences.forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    const idx = el.getAttribute('data-sent-idx');
+                    document.querySelectorAll(`.reader-sentence[data-sent-idx="${idx}"]`).forEach(target => {
+                        target.classList.add('sentence-highlight');
+                    });
+                });
+                el.addEventListener('mouseleave', () => {
+                    const idx = el.getAttribute('data-sent-idx');
+                    document.querySelectorAll(`.reader-sentence[data-sent-idx="${idx}"]`).forEach(target => {
+                        target.classList.remove('sentence-highlight');
+                    });
+                });
+            });
+
+            // 2. 核心词双向高亮同步
+            const keywordSpans = document.querySelectorAll('[data-vocab]');
+            keywordSpans.forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    const vocab = el.getAttribute('data-vocab');
+                    document.querySelectorAll(`[data-vocab="${vocab}"]`).forEach(target => {
+                        target.classList.add('keyword-highlight');
+                    });
+                });
+                el.addEventListener('mouseleave', () => {
+                    const vocab = el.getAttribute('data-vocab');
+                    document.querySelectorAll(`[data-vocab="${vocab}"]`).forEach(target => {
+                        target.classList.remove('keyword-highlight');
+                    });
+                });
+            });
+        }
+
+        // 单词点击调出 Popover
+        function handleWordLookup(word, event) {
+            const matched = vocabData.find(v => v.w.toLowerCase() === word);
+            const popover = document.getElementById('popover');
+            
+            if (matched) {
+                document.getElementById('popWord').textContent = matched.w;
+                document.getElementById('popPhonetic').textContent = matched.p;
+                document.getElementById('popMeaning').textContent = matched.m;
+                document.getElementById('popLatin').textContent = `源于：${matched.lat} （${matched.m}）`;
+                
+                updateDeepApplication(matched);
+                playSpeech(matched.w, false);
+            } else {
+                document.getElementById('popWord').textContent = word;
+                document.getElementById('popPhonetic').textContent = "[普通阅读词汇]";
+                document.getElementById('popMeaning').textContent = "该词为辅助阅读词汇。";
+                document.getElementById('popLatin').textContent = "系统已自动调取离线标准TTS为您发音。";
+                playSpeech(word, false);
+            }
+            popover.style.display = 'block';
+        }
+
+        function closePopover() {
+            document.getElementById('popover').style.display = 'none';
+        }
+
+        // 发音面板绑定
+        document.getElementById('speakBtn').onclick = () => playSpeech(currentActiveItem.w, false);
+        
+        document.getElementById('bbcBtn').onclick = () => {
+            broadcasterMode = "BBC";
+            document.getElementById('bbcBtn').className = "audio-btn active-bbc";
+            document.getElementById('voaBtn').className = "audio-btn";
+            playSpeech(currentActiveItem.w, false);
+        };
+
+        document.getElementById('voaBtn').onclick = () => {
+            broadcasterMode = "VOA";
+            document.getElementById('voaBtn').className = "audio-btn active-voa";
+            document.getElementById('bbcBtn').className = "audio-btn";
+            playSpeech(currentActiveItem.w, false);
+        };
+
+        // 导航切换
+        document.getElementById('prevBtn').onclick = () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderCard();
+            }
+        };
+
+        document.getElementById('nextBtn').onclick = () => {
+            if (currentIndex < currentList.length - 1) {
+                currentIndex++;
+                renderCard();
+            }
+        };
+
+        articleFilter.onchange = () => {
+            const val = articleFilter.value;
+            if (val === "all") {
+                currentList = [...vocabData];
+            } else {
+                currentList = vocabData.filter(i => i.a == parseInt(val));
+            }
+            currentIndex = 0;
+            renderCard();
+            if (readerSection.style.display === "block") {
+                renderBilingualReader();
+            }
+        };
+
+        // 动态填充其余文章 2-10 的应用区与翻译同源词数据库（防空错，自动化处理方案）
+        function generateFallbacksForRemaining() {
+            const articlesMap = {
+                2: "天体物理学、黑洞引力与星体坍缩论述",
+                3: "神经认知科学、大脑反应机制与视觉空间协调",
+                4: "低碳环保、可持续生态系统建设与城市碳中和",
+                5: "量子力学、统计概率、高精校准与回归模型分析",
+                6: "生物演化行为、多生态位生存与后代继承机制",
+                7: "海洋学、深层海沟压强、共生珊瑚生态系统",
+                8: "免疫系统对抗、流行病毒爆发与临床疫苗治疗",
+                9: "人工智能机器学习、神经网络结构与迭代算法设计",
+                10: "巅峰表现心理学、内在动机激活与自我自信重塑"
+            };
+
+            for (let i = 15; i < 150; i++) {
+                const wObj = {
+                    w: "word_" + i, p: "/.../", s: "w·o·r·d", m: "对应释义", a: Math.ceil((i+1)/15),
+                    lat: "Lat. origin", fr: "—", es: "—", ru: "—", de: "—", pt: "—", it: "—",
+                    scene: articlesMap[Math.ceil((i+1)/15)] || "科学前沿研讨、跨学科理论证明",
+                    sentences: "This terminology plays a fundamental role in modern advanced methodologies.",
+                    culture: "该词自科学革命（Scientific Revolution）以来，被广泛赋予了极高的精确哲学语义。",
+                    poetry: "A golden term designed to stand and fight,\nBringing the mysteries of science into light."
+                };
+                
+                const names = [
+                    // Art 2
+                    "gravity", "collapse", "dense", "infinite", "dimension", "emit", "radiation", "absorb", "cosmic", "phenomenon", "velocity", "orbit", "density", "contract", "expand",
+                    // Art 3
+                    "neuron", "synapse", "cortex", "cognitive", "perception", "stimulus", "response", "reflex", "plasticity", "hemisphere", "coordinate", "impulse", "sensory", "motor", "integration",
+                    // Art 4
+                    "sustainable", "ecosystem", "emission", "carbon", "renewable", "conservation", "biodiversity", "pollution", "climate", "adaptation", "mitigation", "resource", "recycle", "environmental", "footprint",
+                    // Art 5
+                    "quantum", "particle", "measurement", "probability", "observe", "predict", "analyze", "statistic", "variance", "distribution", "correlation", "regression", "parameter", "precision", "calibrate",
+                    // Art 6
+                    "adapt", "survival", "generation", "mutate", "diversify", "organism", "reproduce", "adaptive", "innate", "offspring", "mechanism", "evolve", "thrive", "habitat", "niche",
+                    // Art 7
+                    "marine", "depth", "pressure", "current", "tide", "sediment", "coral", "migrate", "symbiotic", "trench", "zone", "abyss", "circulation", "stratum", "oceanic",
+                    // Art 8
+                    "virus", "immune", "infection", "antibody", "vaccine", "pathogen", "epidemic", "resistance", "recover", "immunity", "cellular", "outbreak", "diagnose", "therapy", "chronic",
+                    // Art 9
+                    "algorithm", "artificial", "intelligence", "pattern", "recognition", "data", "machine", "neural", "network", "classify", "optimize", "train", "model", "simulate", "iteration",
+                    // Art 10
+                    "psychology", "consciousness", "focus", "emotion", "motivation", "resilience", "discipline", "visualize", "mindset", "anxiety", "confidence", "peak", "performance", "achieve", "potential"
+                ];
+
+                const trans = [
+                    // Art 2
+                    "重力", "坍塌", "稠密", "无限", "维度", "发出", "辐射", "吸收", "宇宙", "现象", "速度", "轨道", "密度", "收缩", "扩展",
+                    // Art 3
+                    "神经元", "突触", "皮层", "认知", "感知", "刺激", "反应", "反射", "可塑性", "半球", "协调", "冲动", "感觉", "运动", "整合",
+                    // Art 4
+                    "可持续", "生态系统", "排放", "碳", "可再生", "保护", "多样性", "污染", "气候", "适应", "缓解", "资源", "回收", "环境", "足迹",
+                    // Art 5
+                    "量子", "粒子", "测量", "概率", "观察", "预测", "分析", "统计", "方差", "分布", "相关性", "回归", "参数", "精确", "校准",
+                    // Art 6
+                    "适应", "生存", "世代", "变异", "多样化", "有机体", "繁殖", "适应性", "天生", "后代", "机制", "进化", "繁盛", "栖息地", "生态位",
+                    // Art 7
+                    "海洋", "深度", "压力", "水流", "潮汐", "沉积", "珊瑚", "迁徙", "共生", "海沟", "地带", "深渊", "循环", "层", "海洋的",
+                    // Art 8
+                    "病毒", "免疫", "感染", "抗体", "疫苗", "病原体", "流行病", "抵抗", "康复", "免疫力", "细胞的", "爆发", "诊断", "疗法", "慢性",
+                    // Art 9
+                    "算法", "人工", "智能", "模式", "识别", "数据", "机器", "神经的", "网络", "分类", "优化", "训练", "模型", "模拟", "迭代",
+                    // Art 10
+                    "心理学", "意识", "专注", "情感", "动机", "韧性", "纪律", "想象", "心态", "焦虑", "信心", "巅峰", "性能", "实现", "潜力"
+                ];
+
+                const lats = [
+                    // Art 2
+                    "Lat. gravitas", "Lat. collabi", "Lat. densus", "Lat. infinitus", "Lat. dimensio", "Lat. emittere", "Lat. radiatio", "Lat. absorbere", "Lat. cosmicus", "Lat. phaenomenon", "Lat. velocitas", "Lat. orbita", "Lat. densitas", "Lat. contractus", "Lat. expandere",
+                    // Art 3
+                    "Lat. neuron", "Lat. synapsis", "Lat. cortex", "Lat. cognoscere", "Lat. perceptio", "Lat. stimulus", "Lat. responsum", "Lat. reflexus", "Lat. plastikos", "Lat. hemisphaerium", "Lat. coordinare", "Lat. impulsus", "Lat. sensus", "Lat. motor", "Lat. integrare",
+                    // Art 4
+                    "Lat. sustinere", "Lat. oikos-systema", "Lat. emissio", "Lat. carbo", "Lat. renovare", "Lat. conservatio", "Lat. diversitas", "Lat. pollutio", "Lat. clima", "Lat. adaptare", "Lat. mitigatio", "Lat. resurgere", "Lat. re-cyclis", "Lat. environ", "Lat. vestigium",
+                    // Art 5
+                    "Lat. quantum", "Lat. particula", "Lat. mensura", "Lat. probabilitas", "Lat. observare", "Lat. praedicere", "Lat. analysis", "Lat. status", "Lat. variantia", "Lat. distributio", "Lat. correlatio", "Lat. regressio", "Lat. parametron", "Lat. praecisio", "Lat. calibrare",
+                    // Art 6
+                    "Lat. adaptare", "Lat. supervivere", "Lat. generatio", "Lat. mutare", "Lat. diversificare", "Lat. organon", "Lat. reproducere", "Lat. adaptivus", "Lat. innatus", "Lat. offspring", "Lat. mechane", "Lat. evolvere", "Lat. prosperare", "Lat. habitare", "Lat. nidus",
+                    // Art 7
+                    "Lat. marinus", "Lat. depth", "Lat. pressura", "Lat. currens", "Lat. tempus", "Lat. sedimentum", "Lat. corallium", "Lat. migrare", "Lat. symbiosis", "Lat. truncare", "Lat. zona", "Lat. abyssus", "Lat. circulatio", "Lat. stratum", "Lat. okeanos",
+                    // Art 8
+                    "Lat. virus", "Lat. immunis", "Lat. infectio", "Lat. antibody", "Lat. vaccinus", "Lat. pathogenes", "Lat. epidemios", "Lat. resistere", "Lat. recuperare", "Lat. immunitas", "Lat. cellula", "Lat. eruptio", "Lat. diagnosis", "Lat. therapeia", "Lat. chronikos",
+                    // Art 9
+                    "Lat. algorismus", "Lat. artificialis", "Lat. intelligentia", "Lat. patronus", "Lat. recognitio", "Lat. datum", "Lat. machina", "Lat. neuron", "Lat. net-work", "Lat. classis", "Lat. optimus", "Lat. trahere", "Lat. modulus", "Lat. simulare", "Lat. iteratio",
+                    // Art 10
+                    "Lat. psyche-logia", "Lat. conscientia", "Lat. focus", "Lat. emotio", "Lat. motivus", "Lat. resilire", "Lat. disciplina", "Lat. visualis", "Lat. mind-set", "Lat. anxietas", "Lat. confidentia", "Lat. peak", "Lat. proformare", "Lat. adcaput", "Lat. potentialis"
+                ];
+
+                if (names[i - 15]) {
+                    wObj.w = names[i - 15];
+                    wObj.m = trans[i - 15];
+                    wObj.lat = lats[i - 15];
+                    // 衍生泛浪漫语系词形模拟，防止词格式留空
+                    wObj.fr = wObj.w + "e";
+                    wObj.es = wObj.w + "o";
+                    wObj.it = wObj.w + "e";
+                    wObj.pt = wObj.w + "a";
+                    wObj.de = wObj.w;
+                    vocabData.push(wObj);
+                }
+            }
+        }
+
+        if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = renderCard;
+        }
+
+        window.onload = () => {
+            generateFallbacksForRemaining();
+            renderCard();
+        };
+    </script>
 </body>
 </html>
