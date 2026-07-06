@@ -187,6 +187,18 @@
 
         .syllable-span:hover { color: var(--latin-gold); }
 
+        /* Root etymology chips */
+        .root-chip {
+            display: inline-flex; align-items: center; gap: 3px;
+            padding: 6px 10px; background: white;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px; cursor: pointer;
+            font-size: 14px; transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .root-chip:hover { border-color: var(--latin-gold); background: #fffbeb; transform: translateY(-1px); }
+        .root-chip b { color: var(--latin-gold); }
+
         /* 模式 2：双语文章阅读器 */
         .mode-reader {
             display: none;
@@ -823,23 +835,46 @@
 
             const syllableBox = document.getElementById('syllableBox');
             syllableBox.innerHTML = '';
-            const syllables = data.s.split('·');
-            syllables.forEach((syl, index) => {
-                const span = document.createElement('span');
-                span.className = 'syllable-span';
-                span.textContent = syl;
-                span.onclick = (e) => {
-                    e.stopPropagation();
-                    playSpeech(syl, true);
-                };
-                syllableBox.appendChild(span);
-                if (index < syllables.length - 1) {
-                    const divider = document.createElement('span');
-                    divider.textContent = ' · ';
-                    divider.style.color = '#cbd5e1';
-                    syllableBox.appendChild(divider);
-                }
-            });
+            const roots = rootsData[data.w];
+
+            if (roots) {
+                // Enhanced root cards with etymology
+                syllableBox.style.flexWrap = 'wrap';
+                syllableBox.style.gap = '6px';
+                syllableBox.style.background = 'transparent';
+                syllableBox.style.padding = '0';
+                roots.forEach((r) => {
+                    const card = document.createElement('span');
+                    card.className = 'root-chip';
+                    card.title = r.langFull + ': ' + r.note;
+                    card.innerHTML = '<b>' + r.syl + '</b> <small style="color:#0891b2;font-weight:600">' + r.ipa + '</small>' +
+                        '<span style="font-size:9px;background:rgba(139,92,246,0.1);color:#7c3aed;padding:1px 5px;border-radius:6px;margin-left:3px">' + r.lang + '</span>';
+                    card.onclick = (e) => {
+                        e.stopPropagation();
+                        playSpeech(r.syl, true);
+                    };
+                    syllableBox.appendChild(card);
+                });
+            } else {
+                // Fallback: simple syllable split
+                const syllables = data.s.split('·');
+                syllables.forEach((syl, index) => {
+                    const span = document.createElement('span');
+                    span.className = 'syllable-span';
+                    span.textContent = syl;
+                    span.onclick = (e) => {
+                        e.stopPropagation();
+                        playSpeech(syl, true);
+                    };
+                    syllableBox.appendChild(span);
+                    if (index < syllables.length - 1) {
+                        const divider = document.createElement('span');
+                        divider.textContent = ' · ';
+                        divider.style.color = '#cbd5e1';
+                        syllableBox.appendChild(divider);
+                    }
+                });
+            }
 
             updateDeepApplication(data);
         }
@@ -1039,6 +1074,62 @@
             if (readerSection.style.display === "block") {
                 renderBilingualReader();
             }
+        };
+
+        // ========== Root Etymology Data (syllable-level) ==========
+        const rootsData = {
+            hypothesis: [
+                {syl:"hy",ipa:"/haɪ/",lang:"希",langFull:"希腊语",note:"hypo- = 在…之下",latIPA:"/hiː/"},
+                {syl:"poth",ipa:"/ˈpɒθ/",lang:"希",langFull:"希腊语",note:"the- = 放置、命题",latIPA:"/-pɔθ-/"},
+                {syl:"e",ipa:"/ə/",lang:"拉",langFull:"拉丁语",note:"连接元音",latIPA:"/e/"},
+                {syl:"sis",ipa:"/sɪs/",lang:"希→拉",langFull:"希腊→拉丁",note:"抽象名词后缀",latIPA:"/-sis/"}
+            ],
+            gene: [
+                {syl:"gene",ipa:"/dʒiːn/",lang:"希→拉",langFull:"希腊→拉丁",note:"genos = 起源、种类",latIPA:"/ɡe.ne/"}
+            ],
+            inherit: [
+                {syl:"in",ipa:"/ɪn/",lang:"拉",langFull:"拉丁语",note:"in- = 进入、使",latIPA:"/in/"},
+                {syl:"her",ipa:"/ˈher/",lang:"拉",langFull:"拉丁语",note:"heres = 继承人",latIPA:"/heː.reːs/"},
+                {syl:"it",ipa:"/ɪt/",lang:"拉",langFull:"拉丁语",note:"动词后缀",latIPA:"/-it/"}
+            ],
+            dominant: [
+                {syl:"dom",ipa:"/ˈdɒm/",lang:"拉",langFull:"拉丁语",note:"domus = 家、主人",latIPA:"/do.mus/"},
+                {syl:"i",ipa:"/ɪ/",lang:"拉",langFull:"拉丁语",note:"连接元音",latIPA:"/i/"},
+                {syl:"nant",ipa:"/nənt/",lang:"拉",langFull:"拉丁语",note:"现在分词后缀 = …着的",latIPA:"/-nans/"}
+            ],
+            evolution: [
+                {syl:"e",ipa:"/ˌiː/",lang:"拉",langFull:"拉丁语",note:"ex- = 向外",latIPA:"/eː/"},
+                {syl:"vo",ipa:"/və/",lang:"拉",langFull:"拉丁语",note:"volvere = 滚动、展开",latIPA:"/wol.we.re/"},
+                {syl:"lu",ipa:"/ˈluː/",lang:"拉",langFull:"拉丁语",note:"连接音节",latIPA:"/-luː-/"},
+                {syl:"tion",ipa:"/ʃn/",lang:"拉",langFull:"拉丁语",note:"-tio = 动作名词",latIPA:"/-ti.oː/"}
+            ],
+            gravity: [
+                {syl:"grav",ipa:"/ˈɡræv/",lang:"拉",langFull:"拉丁语",note:"gravis = 重的",latIPA:"/ɡra.wis/"},
+                {syl:"i",ipa:"/ə/",lang:"拉",langFull:"拉丁语",note:"连接元音",latIPA:"/i/"},
+                {syl:"ty",ipa:"/ti/",lang:"拉",langFull:"拉丁语",note:"-tas = 性质名词",latIPA:"/-taːs/"}
+            ],
+            psychology: [
+                {syl:"psy",ipa:"/saɪ/",lang:"希",langFull:"希腊语",note:"psyche = 灵魂、心智",latIPA:"/psyː.kʰeː/"},
+                {syl:"cho",ipa:"/ˈkɒ/",lang:"希",langFull:"希腊语",note:"连接音节",latIPA:"/-kʰo-/"},
+                {syl:"lo",ipa:"/lə/",lang:"希",langFull:"希腊语",note:"logos = 学说、言语",latIPA:"/lo.ɡos/"},
+                {syl:"gy",ipa:"/dʒi/",lang:"希→拉",langFull:"希腊→拉丁",note:"学科名词后缀",latIPA:"/-ɡi.a/"}
+            ],
+            sustainable: [
+                {syl:"sus",ipa:"/səˈs/",lang:"拉",langFull:"拉丁语",note:"sub- → sus- = 从下往上",latIPA:"/sub/"},
+                {syl:"tain",ipa:"/ˈteɪn/",lang:"拉",langFull:"拉丁语",note:"tenere = 持有",latIPA:"/te.neː.re/"},
+                {syl:"a",ipa:"/ə/",lang:"拉",langFull:"拉丁语",note:"连接元音",latIPA:"/a/"},
+                {syl:"ble",ipa:"/bl/",lang:"拉→法",langFull:"拉丁→法语",note:"-abilis = 能够…的",latIPA:"/-aː.bi.lis/"}
+            ],
+            intelligence: [
+                {syl:"in",ipa:"/ɪn/",lang:"拉",langFull:"拉丁语",note:"inter- = 在…之间",latIPA:"/in.ter/"},
+                {syl:"tel",ipa:"/ˈtel/",lang:"拉",langFull:"拉丁语",note:"legere = 选择、收集",latIPA:"/le.ɡe.re/"},
+                {syl:"li",ipa:"/ɪ/",lang:"拉",langFull:"拉丁语",note:"连接元音",latIPA:"/li/"},
+                {syl:"gence",ipa:"/dʒəns/",lang:"拉→法",langFull:"拉丁→法语",note:"-entia = 状态名词",latIPA:"/-en.ti.a/"}
+            ],
+            quantum: [
+                {syl:"quan",ipa:"/ˈkwɒn/",lang:"拉",langFull:"拉丁语",note:"quantus = 多少",latIPA:"/kʷan.tus/"},
+                {syl:"tum",ipa:"/təm/",lang:"拉",langFull:"拉丁语",note:"中性名词后缀",latIPA:"/-tum/"}
+            ]
         };
 
         // ========== Word Relations Graph Data ==========
