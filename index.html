@@ -414,6 +414,36 @@
             line-height: 1.6;
             color: var(--text-main);
         }
+
+        /* ── Word Graph Tree ── */
+        .word-graph-section { margin-top: 16px; }
+        .word-graph-toggle {
+            width: 100%; padding: 10px; border: 2px dashed var(--border-color);
+            background: white; border-radius: 10px; font-size: 14px; font-weight: bold;
+            cursor: pointer; color: var(--primary); transition: all 0.2s;
+        }
+        .word-graph-toggle:hover { border-color: var(--latin-gold); background: #fffbeb; }
+        .word-graph-tree { display: none; margin-top: 12px; overflow-x: auto; padding: 16px 0; }
+        .word-graph-tree.open { display: flex; justify-content: center; }
+        .tree-root { text-align: center; }
+        .tree-node {
+            display: inline-flex; flex-direction: column; align-items: center;
+            padding: 8px 14px; margin: 4px; border-radius: 12px;
+            background: white; border: 1.5px solid var(--border-color);
+            font-size: 14px; font-weight: 700; cursor: pointer;
+            transition: all 0.2s; white-space: nowrap; min-width: 70px;
+        }
+        .tree-node:hover { border-color: var(--latin-gold); background: #fffbeb; transform: scale(1.03); }
+        .tree-node.root { font-size: 18px; background: var(--primary); color: #fff; border-color: var(--primary); padding: 10px 20px; }
+        .tree-node.root:hover { background: #1e40af; }
+        .tree-node .node-ipa { font-size: 10px; color: var(--text-muted); font-weight: 400; margin-top: 2px; }
+        .tree-node.root .node-ipa { color: rgba(255,255,255,0.7); }
+        .tree-branch-label { font-size: 10px; color: var(--text-muted); text-align: center; margin: 6px 0 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .tree-branches { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+        .tree-branch { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .tree-connector { width: 30px; height: 2px; background: var(--border-color); }
+        .tree-vline { width: 2px; height: 16px; background: var(--border-color); }
+        .tree-sub-items { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
     </style>
 </head>
 <body>
@@ -526,6 +556,14 @@
                     <h4>📜 谚语 & 原创诗歌</h4>
                     <div class="usage-text" id="usagePoetry">Loading...</div>
                 </div>
+            </div>
+
+            <!-- 🧬 Word Graph -->
+            <div class="word-graph-section">
+                <button class="word-graph-toggle" id="graphToggle" onclick="toggleWordGraph()">
+                    🧬 词源发散图谱 — 展开同根词 & 近义词树
+                </button>
+                <div class="word-graph-tree" id="wordGraphTree"></div>
             </div>
         </div>
 
@@ -1000,6 +1038,167 @@
             renderCard();
             if (readerSection.style.display === "block") {
                 renderBilingualReader();
+            }
+        };
+
+        // ========== Word Relations Graph Data ==========
+        const wordRelations = {
+            // Root-family relations
+            hypothesis: {
+                sameRoot: ["thesis","synthesis","antithesis","photosynthesis","parenthesis"],
+                sameMeaning: ["theory","assumption","conjecture","premise","postulate","supposition"]
+            },
+            gene: {
+                sameRoot: ["genetic","genome","genesis","generate","generation","genus","generic"],
+                sameMeaning: ["trait","inherit","hereditary","chromosome","DNA"]
+            },
+            inherit: {
+                sameRoot: ["hereditary","heritage","heir","inherent"],
+                sameMeaning: ["acquire","receive","genetic","trait"]
+            },
+            dominant: {
+                sameRoot: ["dominate","dominion","predominant","domineering"],
+                sameMeaning: ["prevailing","superior","controlling","governing","paramount"]
+            },
+            mutation: {
+                sameRoot: ["mutate","mutant","transmute","permutation","commute"],
+                sameMeaning: ["variation","alteration","transformation","modification","evolution"]
+            },
+            evolution: {
+                sameRoot: ["evolve","revolution","devolve","involve","convoluted"],
+                sameMeaning: ["development","progression","adaptation","transformation","advancement"]
+            },
+            gravity: {
+                sameRoot: ["gravitate","gravitational","aggravate","grave"],
+                sameMeaning: ["weight","force","attraction","pull","seriousness"]
+            },
+            cognitive: {
+                sameRoot: ["cognition","recognize","incognito","cognizant","diagnosis"],
+                sameMeaning: ["mental","intellectual","perception","reasoning","consciousness"]
+            },
+            sustainable: {
+                sameRoot: ["sustain","sustenance","abstain","retain","contain","maintain"],
+                sameMeaning: ["renewable","enduring","viable","eco-friendly","conservation"]
+            },
+            quantum: {
+                sameRoot: ["quantity","quantify","quantitative","quanta"],
+                sameMeaning: ["particle","atomic","subatomic","microscopic","measurement"]
+            },
+            psychology: {
+                sameRoot: ["psychological","psychologist","psychiatry","psychic","psyche"],
+                sameMeaning: ["mindset","mental","consciousness","behavior","cognition"]
+            },
+            intelligence: {
+                sameRoot: ["intelligent","intellect","intelligible","intellectual"],
+                sameMeaning: ["wisdom","understanding","cleverness","aptitude","reasoning"]
+            }
+        };
+
+        function getOrBuildRelations(word) {
+            if (wordRelations[word]) return wordRelations[word];
+            // Auto-build from vocabData: find words sharing the same first 3-4 letters (root match)
+            var root = word.substring(0, 3).toLowerCase();
+            var sameRoot = vocabData.filter(function(v) {
+                return v.w !== word && v.w.toLowerCase().substring(0, 3) === root;
+            }).slice(0, 5).map(function(v) { return v.w; });
+
+            // Meaning match: find words in same article
+            var articleId = null;
+            for (var i = 0; i < vocabData.length; i++) {
+                if (vocabData[i].w === word) { articleId = vocabData[i].a; break; }
+            }
+            var sameMeaning = [];
+            if (articleId) {
+                sameMeaning = vocabData.filter(function(v) {
+                    return v.a === articleId && v.w !== word;
+                }).slice(0, 5).map(function(v) { return v.w; });
+            }
+
+            return { sameRoot: sameRoot, sameMeaning: sameMeaning };
+        }
+
+        function renderWordGraph(word) {
+            var tree = document.getElementById('wordGraphTree');
+            if (!tree) return;
+            var rel = getOrBuildRelations(word);
+
+            var html = '<div class="tree-root">';
+            html += '<div class="tree-node root">' + word + '</div>';
+
+            // Root family branch
+            if (rel.sameRoot.length > 0) {
+                html += '<div class="tree-vline"></div>';
+                html += '<div class="tree-branches">';
+                html += '<div class="tree-branch">';
+                html += '<div class="tree-branch-label">🌱 同根词族</div>';
+                html += '<div class="tree-sub-items">';
+                rel.sameRoot.forEach(function(rw) {
+                    var info = vocabData.find(function(v) { return v.w === rw; });
+                    var ipa = info ? info.p : '';
+                    var meaning = info ? info.m : '';
+                    html += '<div class="tree-node" onclick="jumpToWord(\'' + rw + '\')" title="' + meaning + '">' + rw;
+                    if (ipa) html += '<div class="node-ipa">' + ipa + '</div>';
+                    html += '</div>';
+                });
+                html += '</div></div>';
+
+                // Meaning family branch
+                html += '<div class="tree-vline"></div>';
+                html += '<div class="tree-branch">';
+                html += '<div class="tree-branch-label">💡 近义词群</div>';
+                html += '<div class="tree-sub-items">';
+                rel.sameMeaning.forEach(function(rw) {
+                    var info = vocabData.find(function(v) { return v.w === rw; });
+                    var ipa = info ? info.p : '';
+                    var meaning = info ? info.m : '';
+                    html += '<div class="tree-node" onclick="jumpToWord(\'' + rw + '\')" title="' + meaning + '">' + rw;
+                    if (ipa) html += '<div class="node-ipa">' + ipa + '</div>';
+                    html += '</div>';
+                });
+                html += '</div></div>';
+                html += '</div>';
+            }
+
+            html += '</div>';
+            tree.innerHTML = html;
+        }
+
+        function toggleWordGraph() {
+            var tree = document.getElementById('wordGraphTree');
+            var btn = document.getElementById('graphToggle');
+            var isOpen = tree.classList.contains('open');
+            if (isOpen) {
+                tree.classList.remove('open');
+                btn.innerHTML = '🧬 词源发散图谱 — 展开同根词 & 近义词树';
+            } else {
+                var word = currentActiveItem ? currentActiveItem.w : 'hypothesis';
+                renderWordGraph(word);
+                tree.classList.add('open');
+                btn.innerHTML = '🧬 词源发散图谱 — 收起 ▲';
+            }
+        }
+
+        function jumpToWord(word) {
+            var idx = vocabData.findIndex(function(v) { return v.w === word; });
+            if (idx >= 0) {
+                currentIndex = idx;
+                renderCard();
+                updateDeepApplication(currentActiveItem);
+                renderWordGraph(word);
+                document.getElementById('flashcardSection').style.display = 'flex';
+                document.getElementById('readerSection').style.display = 'none';
+                document.getElementById('tabFlash').classList.add('active');
+                document.getElementById('tabRead').classList.remove('active');
+            }
+        }
+
+        // Also rebuild graph when flashcard changes
+        var _origRenderCard = renderCard;
+        renderCard = function() {
+            _origRenderCard();
+            var tree = document.getElementById('wordGraphTree');
+            if (tree && tree.classList.contains('open') && currentActiveItem) {
+                renderWordGraph(currentActiveItem.w);
             }
         };
 

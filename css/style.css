@@ -1151,6 +1151,42 @@ body {
 .mode-btn:hover { color: var(--text-primary); background: var(--bg-hover); }
 .mode-btn.active { background: var(--bg-card); color: var(--accent-blue); }
 
+.flashcard-voice {
+  display: flex;
+  gap: 6px;
+}
+
+.voice-btn {
+  padding: 12px 18px;
+  border: 2px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font-main);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.voice-btn:hover {
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+}
+
+.voice-btn.active-bbc {
+  background: #bb1919;
+  color: #fff;
+  border-color: #bb1919;
+}
+
+.voice-btn.active-voa {
+  background: #0072c6;
+  color: #fff;
+  border-color: #0072c6;
+}
+
 .flashcard-toggles { display: flex; gap: 12px; }
 
 .toggle-label {
@@ -1206,7 +1242,7 @@ body {
 .flashcard-card {
   width: 100%;
   max-width: 480px;
-  height: 340px;
+  height: 280px;
   perspective: 1200px;
   cursor: pointer;
 }
@@ -1232,7 +1268,7 @@ body {
   height: 100%;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  border-radius: 20px;
+  border-radius: 16px;
   border: 1.5px solid rgba(255,255,255,0.6);
   display: flex;
   flex-direction: column;
@@ -1247,7 +1283,8 @@ body {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   box-shadow:
-    0 8px 32px rgba(0,0,0,0.06),
+    0 12px 40px rgba(0,0,0,0.08),
+    0 2px 8px rgba(0,0,0,0.04),
     inset 0 1px 0 rgba(255,255,255,0.8);
 }
 
@@ -1256,24 +1293,52 @@ body {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   box-shadow:
-    0 8px 32px rgba(0,0,0,0.06),
+    0 12px 40px rgba(0,0,0,0.08),
+    0 2px 8px rgba(0,0,0,0.04),
     inset 0 1px 0 rgba(255,255,255,0.8);
   transform: rotateY(180deg);
 }
 
 .fc-word {
-  font-size: 38px;
+  font-size: 42px;
   font-weight: 800;
-  color: #d97706;
+  color: var(--accent-blue);
   margin-bottom: 12px;
   letter-spacing: 1px;
+  cursor: pointer;
 }
 
 .fc-syllables {
-  font-size: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+  font-size: 16px;
   color: #4b5563;
   font-weight: 600;
   margin-bottom: 8px;
+  background: rgba(241,245,249,0.6);
+  padding: 6px 14px;
+  border-radius: 20px;
+}
+
+.fc-syllable {
+  cursor: pointer;
+  font-weight: 700;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.fc-syllable:hover {
+  background: rgba(59,130,246,0.12);
+  color: var(--accent-blue);
+}
+
+.fc-sep {
+  color: #cbd5e1;
+  font-weight: 400;
+  user-select: none;
 }
 
 .fc-phonetic {
@@ -1291,7 +1356,7 @@ body {
 }
 
 .fc-meaning {
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 800;
   color: #1f2937;
   margin-bottom: 16px;
@@ -1326,6 +1391,21 @@ body {
   justify-content: center;
   gap: 16px;
   margin-bottom: 24px;
+}
+
+/* Flashcard Bottom Nav: Prev | Voice | Next */
+.flashcard-bottom-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 0 8px;
+}
+
+.flashcard-bottom-nav .flashcard-voice {
+  display: flex;
+  gap: 6px;
 }
 
 .flashcard-counter {
@@ -1724,10 +1804,10 @@ body {
     font-size: 18px;
   }
 
-  .flashcard-card { height: 280px; max-width: 100%; }
+  .flashcard-card { height: 260px; max-width: 100%; }
 
-  .fc-word { font-size: 28px; }
-  .fc-meaning { font-size: 22px; }
+  .fc-word { font-size: 32px; }
+  .fc-meaning { font-size: 24px; }
 
   .flashcard-front,
   .flashcard-back { padding: 20px; }
@@ -1744,11 +1824,12 @@ body {
 }
 
 @media (max-width: 480px) {
-  .flashcard-card { height: 250px; }
-  .fc-word { font-size: 24px; }
-  .fc-meaning { font-size: 20px; }
-  .fc-syllables { font-size: 15px; }
+  .flashcard-card { height: 240px; }
+  .fc-word { font-size: 28px; }
+  .fc-meaning { font-size: 22px; }
+  .fc-syllables { font-size: 14px; padding: 4px 10px; }
   .fc-phonetic { font-size: 13px; }
+  .voice-btn { padding: 10px 14px; font-size: 12px; }
 }
 
 

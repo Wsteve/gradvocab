@@ -910,6 +910,26 @@ function shuffleArray(arr) {
   return a;
 }
 
+function renderSyllables(word) {
+  if (!word || !word.syllables) return '';
+  return word.syllables.split('·').map(function(syl) {
+    return '<span class="fc-syllable" data-syl="' + syl.replace(/"/g, '&quot;') + '">' + syl + '</span>';
+  }).join('<span class="fc-sep">·</span>');
+}
+
+function speakSyllable(syl) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  var config = getVoiceConfig();
+  var u = new SpeechSynthesisUtterance(syl);
+  u.lang = config.lang;
+  u.rate = config.rate * 0.5;
+  u.pitch = 1;
+  var voice = findBestVoice(config.lang, config.gender);
+  if (voice) u.voice = voice;
+  window.speechSynthesis.speak(u);
+}
+
 function renderFlashcard() {
   var list = flashcardState.cardList;
   var idx = flashcardState.index;
@@ -924,7 +944,7 @@ function renderFlashcard() {
   var word = WORDS[wordIdx];
   var isLearned = learnedWords.has(wordIdx);
   document.querySelector('.fc-word').textContent = word.word;
-  document.querySelector('.fc-syllables').textContent = word.syllables;
+  document.querySelector('.fc-syllables').innerHTML = renderSyllables(word);
   document.querySelector('.fc-phonetic').textContent = word.phonetic;
   document.querySelector('.fc-meaning').textContent = word.meaning;
   var ety = typeof ETYMOLOGY !== 'undefined' ? ETYMOLOGY[word.word] : null;
@@ -960,13 +980,12 @@ function renderFlashcard() {
 function ensureFlashcardStage() {
   var stage = document.querySelector('.flashcard-stage');
   if (stage.querySelector('.flashcard-card')) return;
-  stage.innerHTML = '<button class="flashcard-nav-btn prev" title="上一个 (←)">←</button>' +
+  stage.innerHTML =
     '<div class="flashcard-card" id="flashcard-card">' +
     '<div class="flashcard-inner">' +
     '<div class="flashcard-front"><div class="fc-word"></div><div class="fc-syllables"></div><div class="fc-phonetic"></div><div class="fc-hint">点击或按 Space 翻转</div></div>' +
     '<div class="flashcard-back"><div class="fc-meaning"></div><div class="fc-etymology"></div><div class="fc-sentence"></div></div>' +
-    '</div></div>' +
-    '<button class="flashcard-nav-btn next" title="下一个 (→)">→</button>';
+    '</div></div>';
 }
 
 function findWordSentence(word) {
@@ -1042,6 +1061,37 @@ function updateFlashcardProgress() {
   if (text) text.textContent = learned + '/' + total + ' 已掌握';
 }
 
+function setupFlashcardVoiceUI() {
+  var isBBC = voiceMode.indexOf('bbc') === 0;
+  document.querySelectorAll('.voice-btn').forEach(function(btn) {
+    if (btn.dataset.voice === 'bbc') {
+      btn.classList.toggle('active-bbc', isBBC);
+    } else {
+      btn.classList.toggle('active-voa', !isBBC);
+    }
+  });
+
+  document.querySelectorAll('.voice-btn').forEach(function(btn) {
+    if (btn._voiceBound) return;
+    btn._voiceBound = true;
+    btn.addEventListener('click', function() {
+      var voice = this.dataset.voice;
+      document.querySelectorAll('.voice-btn').forEach(function(b) {
+        b.classList.remove('active-bbc', 'active-voa');
+      });
+      if (voice === 'bbc') {
+        this.classList.add('active-bbc');
+        voiceMode = 'bbc-female';
+      } else {
+        this.classList.add('active-voa');
+        voiceMode = 'voa-female';
+      }
+      localStorage.setItem('voiceMode', voiceMode);
+      speakCurrentFlashcard();
+    });
+  });
+}
+
 function setupFlashcardEvents() {
   var filterSelect = document.getElementById('flashcard-filter');
   if (filterSelect && !filterSelect._bound) {
@@ -1082,16 +1132,33 @@ function setupFlashcardEvents() {
   var card = document.getElementById('flashcard-card');
   if (card && !card._bound) {
     card._bound = true;
+    // Syllable/word click delegation (before flip handler to intercept)
+    card.addEventListener('click', function(e) {
+      var sylEl = e.target.closest('.fc-syllable');
+      if (sylEl) {
+        e.stopImmediatePropagation();
+        var syl = sylEl.dataset.syl;
+        if (syl) speakSyllable(syl);
+        return;
+      }
+      if (e.target.closest('.fc-word')) {
+        e.stopImmediatePropagation();
+        speakCurrentFlashcard();
+        return;
+      }
+    });
     card.addEventListener('click', flipFlashcard);
   }
-  var prevBtn = document.querySelector('.flashcard-stage .prev');
-  var nextBtn = document.querySelector('.flashcard-stage .next');
+  var prevBtn = document.querySelector('.flashcard-bottom-nav .prev');
+  var nextBtn = document.querySelector('.flashcard-bottom-nav .next');
   if (prevBtn && !prevBtn._bound) { prevBtn._bound = true; prevBtn.addEventListener('click', function() { navigateFlashcard(-1); }); }
   if (nextBtn && !nextBtn._bound) { nextBtn._bound = true; nextBtn.addEventListener('click', function() { navigateFlashcard(1); }); }
   var learnedBtn = document.getElementById('flashcard-learned-btn');
   if (learnedBtn && !learnedBtn._bound) { learnedBtn._bound = true; learnedBtn.addEventListener('click', toggleFlashcardLearned); }
   var speakBtn = document.getElementById('flashcard-speak-btn');
   if (speakBtn && !speakBtn._bound) { speakBtn._bound = true; speakBtn.addEventListener('click', speakCurrentFlashcard); }
+
+  setupFlashcardVoiceUI();
 }
 
 
