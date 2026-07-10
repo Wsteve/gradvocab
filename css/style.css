@@ -227,6 +227,9 @@ body {
 
 .read-aloud-btn {
   font-weight: 600;
+  font-size: 12px;
+  padding: 8px 12px;
+  min-width: 56px;
 }
 
 .voice-toggle {
@@ -243,6 +246,12 @@ body {
 .en-para.reading {
   background: rgba(59,130,246,0.06);
   border-left: 3px solid var(--accent-blue);
+  transition: all 0.3s ease;
+}
+
+.cn-para.reading {
+  background: rgba(16,185,129,0.08);
+  border-left: 3px solid var(--accent-green);
   transition: all 0.3s ease;
 }
 

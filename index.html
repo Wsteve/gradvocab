@@ -524,6 +524,12 @@
 
         <!-- 模式二：双语阅读器 -->
         <div id="readerSection" class="mode-reader">
+            <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                <span id="readAloudStatus" style="font-size:12px;color:var(--text-muted);margin-right:auto;"></span>
+                <button id="readEnBtn" class="nav-btn" style="background-color:#2563eb;font-size:13px;padding:10px 16px;border-radius:10px;" onclick="toggleReadAloud('en')">🇬🇧 朗读英文</button>
+                <button id="readCnBtn" class="nav-btn" style="background-color:#7c3aed;font-size:13px;padding:10px 16px;border-radius:10px;" onclick="toggleReadAloud('cn')">🇨🇳 朗读中文</button>
+                <button id="readBothBtn" class="nav-btn" style="background-color:#059669;font-size:13px;padding:10px 16px;border-radius:10px;" onclick="toggleReadAloud('both')">🔊 双语朗读</button>
+            </div>
             <div class="reader-grid">
                 <!-- 左列：可交互英文原文 -->
                 <div class="reader-panel" id="englishReaderPanel"></div>
@@ -580,6 +586,9 @@
         </div>
 
     </div>
+
+    <!-- 悬停2秒取词提示 -->
+    <div id="hoverTooltip" style="position:fixed;background:#1e293b;color:#fff;padding:6px 14px;border-radius:8px;font-size:15px;font-weight:bold;z-index:2000;display:none;pointer-events:none;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,0.3);max-width:220px;text-align:center;line-height:1.4;"></div>
 
     <!-- 右上角独立取词浮窗 (Popover) -->
     <div class="popover" id="popover">
@@ -804,21 +813,75 @@
         }
 
         // 发音控制
-        function playSpeech(text, isSlow = false) {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'en-US';
-            utterance.voice = getVoice(broadcasterMode === "BBC" ? "en-GB" : "en-US");
-            utterance.rate = broadcasterMode === "BBC" ? (isSlow ? 0.45 : 0.78) : (isSlow ? 0.4 : 0.65);
-            window.speechSynthesis.speak(utterance);
+        // ========== 智能语音引擎（优先 Google/Apple 高质语音） ==========
+        function findBestVoice(lang, gender) {
+            var voices = window.speechSynthesis.getVoices();
+            if (voices.length === 0) return null;
+
+            var scored = voices.map(function(v) {
+                var score = 0;
+                var vl = v.lang.toLowerCase();
+                var vn = v.name.toLowerCase();
+
+                // Language match
+                if (vl === lang) score += 100;
+                else if (vl.startsWith(lang.split('-')[0])) score += 50;
+                else if (lang === 'en-US' && vl.startsWith('en')) score += 20;
+                else if (lang === 'zh-CN' && vl.startsWith('zh')) score += 30;
+
+                // Gender detection
+                var femaleNames = ['female','woman','samantha','lisa','karen','moira','fiona','susan','zira','veena','catherine','alice','mary'];
+                var maleNames = ['male','man','daniel','tom','alex','fred','oliver','arthur','jack','harry'];
+                var isFemale = femaleNames.some(function(n) { return vn.indexOf(n) >= 0; });
+                var isMale = maleNames.some(function(n) { return vn.indexOf(n) >= 0; });
+                if (gender === 'female' && isFemale) score += 30;
+                else if (gender === 'male' && isMale) score += 30;
+                else if (!isFemale && !isMale) score += 10; // neutral = usable
+
+                // Google / Wavenet = neural TTS, best quality
+                if (vn.indexOf('google') >= 0) score += 45;
+                if (vn.indexOf('wavenet') >= 0) score += 50;
+                if (vn.indexOf('neural') >= 0) score += 40;
+                if (vn.indexOf('natural') >= 0 || vn.indexOf('premium') >= 0 || vn.indexOf('enhanced') >= 0) score += 30;
+
+                // Microsoft / Edge voices
+                if (vn.indexOf('microsoft') >= 0) score += 20;
+
+                // macOS voices (Samantha, Daniel, etc. — high quality on Safari)
+                var macVoices = ['samantha','daniel','karen','alex','tom','tingting','meijia'];
+                if (macVoices.some(function(n) { return vn.indexOf(n) >= 0; })) score += 18;
+
+                // Penalize very robotic voices
+                if (vn.indexOf('default') >= 0 || vn.indexOf('generic') >= 0) score -= 30;
+
+                // Local service = usually better than network
+                if (v.localService) score += 5;
+
+                return { voice: v, score: score };
+            });
+
+            scored.sort(function(a, b) { return b.score - a.score; });
+
+            // Log top 3 for debugging
+            if (scored.length > 0 && scored[0].score > 0) {
+                console.log('Voice selected:', scored[0].voice.name, 'score:', scored[0].score,
+                    '| runner-up:', scored[1] ? scored[1].voice.name + '(' + scored[1].score + ')' : 'none');
+                return scored[0].voice;
+            }
+            return null;
         }
 
-        function getVoice(langCode) {
-            const voices = window.speechSynthesis.getVoices();
-            return voices.find(v => v.lang.startsWith(langCode) && 
-                (v.name.includes("female") || v.name.includes("Zira") || v.name.includes("Hazel") || v.name.includes("Samantha") || v.name.includes("Siri"))
-            ) || voices.find(v => v.lang.startsWith(langCode));
+        function playSpeech(text, isSlow) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            var utterance = new SpeechSynthesisUtterance(text);
+            var targetLang = broadcasterMode === "BBC" ? "en-GB" : "en-US";
+            var gender = 'female'; // prefer female voice for clarity
+            utterance.lang = targetLang;
+            utterance.voice = findBestVoice(targetLang, gender);
+            utterance.rate = broadcasterMode === "BBC" ? (isSlow ? 0.48 : 0.82) : (isSlow ? 0.42 : 0.70);
+            utterance.pitch = 1.0;
+            window.speechSynthesis.speak(utterance);
         }
 
         // 渲染闪卡
@@ -1398,6 +1461,267 @@
         if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
             speechSynthesis.onvoiceschanged = renderCard;
         }
+
+        // ========== 全文朗读（英文/中文/双语） ==========
+        var readState = {
+            active: false,
+            mode: 'en',       // 'en' | 'cn' | 'both'
+            sentencesEn: [],
+            sentencesCn: [],
+            idx: 0,
+            subPhase: 'en'    // for 'both' mode: 'en' then 'cn'
+        };
+
+        function toggleReadAloud(mode) {
+            if (readState.active && readState.mode === mode) {
+                stopReading();
+                return;
+            }
+            if (readState.active) stopReading();
+            startReadingMode(mode);
+        }
+
+        function startReadingMode(mode) {
+            var articleId = articleFilter.value === "all" ? 1 : parseInt(articleFilter.value);
+            var article = articlesData[articleId];
+            if (!article) return;
+
+            var enSentences = article.en.match(/[^.!?]+[.!?]+/g) || [article.en];
+            var cnSentences = article.cn.match(/[^。！？]+[。！？]+/g) || [article.cn];
+
+            readState.active = true;
+            readState.mode = mode;
+            readState.sentencesEn = enSentences.map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; });
+            readState.sentencesCn = cnSentences.map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; });
+            readState.idx = 0;
+            readState.subPhase = 'en';
+
+            // Update button styles
+            resetReadButtons();
+            if (mode === 'en') {
+                var btn = document.getElementById('readEnBtn');
+                btn.textContent = '⏹ 停止';
+                btn.style.backgroundColor = '#dc2626';
+            } else if (mode === 'cn') {
+                var btn = document.getElementById('readCnBtn');
+                btn.textContent = '⏹ 停止';
+                btn.style.backgroundColor = '#dc2626';
+            } else {
+                var btn = document.getElementById('readBothBtn');
+                btn.textContent = '⏹ 停止';
+                btn.style.backgroundColor = '#dc2626';
+            }
+
+            document.getElementById('readAloudStatus').textContent = '正在朗读...';
+            speakNextInSequence();
+        }
+
+        function speakNextInSequence() {
+            if (!readState.active) return;
+
+            var maxLen = Math.max(readState.sentencesEn.length, readState.sentencesCn.length);
+            if (readState.idx >= maxLen) {
+                stopReading();
+                return;
+            }
+
+            var text = '';
+            var lang = '';
+            var panel = null;
+
+            if (readState.mode === 'en') {
+                text = readState.sentencesEn[readState.idx] || '';
+                lang = 'en-US';
+                panel = 'en';
+            } else if (readState.mode === 'cn') {
+                text = readState.sentencesCn[readState.idx] || '';
+                lang = 'zh-CN';
+                panel = 'cn';
+            } else if (readState.mode === 'both') {
+                if (readState.subPhase === 'en') {
+                    text = readState.sentencesEn[readState.idx] || '';
+                    lang = 'en-US';
+                    panel = 'en';
+                    readState.subPhase = 'cn'; // next phase
+                } else {
+                    text = readState.sentencesCn[readState.idx] || '';
+                    lang = 'zh-CN';
+                    panel = 'cn';
+                    readState.subPhase = 'en'; // reset for next sentence
+                    readState.idx++;
+                }
+            }
+
+            if (!text) {
+                if (readState.mode === 'both' && readState.subPhase === 'cn') {
+                    readState.idx++;
+                    readState.subPhase = 'en';
+                } else {
+                    readState.idx++;
+                }
+                speakNextInSequence();
+                return;
+            }
+
+            var total = readState.mode === 'both'
+                ? readState.sentencesEn.length
+                : (readState.mode === 'en' ? readState.sentencesEn.length : readState.sentencesCn.length);
+            document.getElementById('readAloudStatus').textContent =
+                '朗读中 (' + (readState.idx + 1) + '/' + total + ') ' +
+                (readState.mode === 'both' ? (readState.subPhase === 'en' ? '英→中' : '英→中') : '');
+
+            // Highlight sentence
+            highlightReadSentence(readState.idx, panel);
+
+            if (!('speechSynthesis' in window)) {
+                advanceAfterSpeak();
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+            var utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+            utterance.rate = lang === 'zh-CN' ? 0.88 : (broadcasterMode === "BBC" ? 0.82 : 0.70);
+            utterance.pitch = lang === 'zh-CN' ? 1.05 : 1.0;
+
+            // Smart voice selection for both languages
+            if (lang === 'zh-CN') {
+                var zhVoice = findBestVoice('zh-CN', 'female');
+                if (!zhVoice) zhVoice = findBestVoice('zh-CN', '');
+                if (zhVoice) utterance.voice = zhVoice;
+            } else {
+                var targetLang = broadcasterMode === "BBC" ? "en-GB" : "en-US";
+                var voice = findBestVoice(targetLang, 'female');
+                if (voice) utterance.voice = voice;
+            }
+
+            utterance.onend = function() { advanceAfterSpeak(); };
+            utterance.onerror = function() { advanceAfterSpeak(); };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function advanceAfterSpeak() {
+            if (!readState.active) return;
+            setTimeout(speakNextInSequence, 250);
+        }
+
+        function highlightReadSentence(idx, panel) {
+            // Remove all highlights
+            document.querySelectorAll('.reader-sentence').forEach(function(el) {
+                el.classList.remove('sentence-highlight');
+            });
+
+            var selector = '.reader-sentence[data-sent-idx="' + idx + '"]';
+            var targets = document.querySelectorAll(selector);
+            // If panel specified, only highlight that side
+            if (panel === 'en') {
+                var enPanel = document.getElementById('englishReaderPanel');
+                if (enPanel) {
+                    enPanel.querySelectorAll(selector).forEach(function(el) {
+                        el.classList.add('sentence-highlight');
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    });
+                }
+            } else if (panel === 'cn') {
+                var cnPanel = document.getElementById('chineseReaderPanel');
+                if (cnPanel) {
+                    cnPanel.querySelectorAll(selector).forEach(function(el) {
+                        el.classList.add('sentence-highlight');
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    });
+                }
+            } else {
+                targets.forEach(function(el) {
+                    el.classList.add('sentence-highlight');
+                });
+                if (targets.length > 0) {
+                    targets[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+
+        function stopReading() {
+            readState.active = false;
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+
+            resetReadButtons();
+            document.getElementById('readAloudStatus').textContent = '';
+            document.querySelectorAll('.reader-sentence').forEach(function(el) {
+                el.classList.remove('sentence-highlight');
+            });
+        }
+
+        function resetReadButtons() {
+            var enBtn = document.getElementById('readEnBtn');
+            var cnBtn = document.getElementById('readCnBtn');
+            var bothBtn = document.getElementById('readBothBtn');
+            enBtn.textContent = '🇬🇧 朗读英文';
+            enBtn.style.backgroundColor = '#2563eb';
+            cnBtn.textContent = '🇨🇳 朗读中文';
+            cnBtn.style.backgroundColor = '#7c3aed';
+            bothBtn.textContent = '🔊 双语朗读';
+            bothBtn.style.backgroundColor = '#059669';
+        }
+
+        // ========== 悬停2秒显示中文意思 ==========
+        var hoverTimer = null;
+        var hoverTooltip = document.getElementById('hoverTooltip');
+
+        function setupHoverTooltips() {
+            document.querySelectorAll('.reader-word').forEach(function(el) {
+                el.removeEventListener('mouseenter', handleWordHoverEnter);
+                el.removeEventListener('mouseleave', handleWordHoverLeave);
+                el.addEventListener('mouseenter', handleWordHoverEnter);
+                el.addEventListener('mouseleave', handleWordHoverLeave);
+            });
+            document.addEventListener('mousemove', handleGlobalMouseMove);
+        }
+
+        function handleWordHoverEnter(e) {
+            var wordEl = e.target;
+            var rawWord = wordEl.getAttribute('data-vocab') || wordEl.textContent || '';
+            var word = rawWord.replace(/[^a-zA-Z]/g, '').toLowerCase().trim();
+            if (!word || word.length < 2) return;
+
+            hoverTimer = setTimeout(function() {
+                var meaning = '';
+                var matched = vocabData.find(function(v) { return v.w.toLowerCase() === word; });
+                if (matched) {
+                    meaning = matched.m;
+                } else {
+                    hoverTooltip.style.display = 'none';
+                    return;
+                }
+
+                hoverTooltip.textContent = meaning;
+                hoverTooltip.style.display = 'block';
+            }, 2000);
+        }
+
+        function handleWordHoverLeave(e) {
+            if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
+            hoverTooltip.style.display = 'none';
+        }
+
+        function handleGlobalMouseMove(e) {
+            if (hoverTooltip.style.display === 'block') {
+                var left = e.clientX + 16;
+                var top = e.clientY - 38;
+                if (left + 200 > window.innerWidth) left = e.clientX - 210;
+                if (top < 10) top = e.clientY + 22;
+                hoverTooltip.style.left = left + 'px';
+                hoverTooltip.style.top = top + 'px';
+            }
+        }
+
+        // ========== 覆写 renderBilingualReader 以接入悬停 + 朗读重置 ==========
+        var _origRenderBilingualReader = renderBilingualReader;
+        renderBilingualReader = function() {
+            _origRenderBilingualReader();
+            setupHoverTooltips();
+            if (readState.active) stopReading();
+        };
 
         window.onload = () => {
             generateFallbacksForRemaining();

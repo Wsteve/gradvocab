@@ -242,7 +242,9 @@ function renderArticle(index) {
     '<div class="article-nav-row">' +
       '<button class="article-nav-btn prev-article" ' + (index === 0 ? 'disabled' : '') + '>← 上一篇</button>' +
       '<span class="article-nav-info">' + article.cnTitle + '</span>' +
-      '<button class="article-nav-btn read-aloud-btn" title="朗读全文">🔊 全文朗读</button>' +
+      '<button class="article-nav-btn read-aloud-btn read-en-btn" title="朗读英文" data-mode="en">🇬🇧 英文</button>' +
+      '<button class="article-nav-btn read-aloud-btn read-cn-btn" title="朗读中文" data-mode="cn">🇨🇳 中文</button>' +
+      '<button class="article-nav-btn read-aloud-btn read-both-btn" title="双语朗读" data-mode="both">🔊 双语</button>' +
       '<button class="article-nav-btn voice-toggle" title="切换发音人">🎙️ <span class="voice-label">VOA</span></button>' +
       '<button class="article-nav-btn next-article" ' + (index >= ARTICLES.length - 1 ? 'disabled' : '') + '>下一篇 →</button>' +
     '</div>';
@@ -305,6 +307,46 @@ function renderArticle(index) {
     });
   });
 
+  // Hover 2s → show Chinese meaning tooltip
+  ensureHoverTooltip();
+  document.querySelectorAll('.vocab-word').forEach(function(el) {
+    if (el._hoverBound) return;
+    el._hoverBound = true;
+    var hoverTimer = null;
+    el.addEventListener('mouseenter', function(e) {
+      var wordIdx = parseInt(el.dataset.wordIndex);
+      if (isNaN(wordIdx)) return;
+      var word = WORDS[wordIdx];
+      if (!word) return;
+      hoverTimer = setTimeout(function() {
+        var tip = document.getElementById('hoverWordTip');
+        if (!tip) return;
+        tip.textContent = word.meaning;
+        tip.style.display = 'block';
+      }, 2000);
+    });
+    el.addEventListener('mouseleave', function() {
+      if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
+      var tip = document.getElementById('hoverWordTip');
+      if (tip) tip.style.display = 'none';
+    });
+  });
+
+  // Global mousemove for tooltip positioning
+  if (!document._hoverMoveBound) {
+    document._hoverMoveBound = true;
+    document.addEventListener('mousemove', function(e) {
+      var tip = document.getElementById('hoverWordTip');
+      if (!tip || tip.style.display !== 'block') return;
+      var left = e.clientX + 16;
+      var top = e.clientY - 38;
+      if (left + 200 > window.innerWidth) left = e.clientX - 210;
+      if (top < 10) top = e.clientY + 22;
+      tip.style.left = left + 'px';
+      tip.style.top = top + 'px';
+    });
+  }
+
   // Mark complete button
   const btnContainer = document.querySelector('.article-word-section .btn-container');
   if (btnContainer) {
@@ -331,18 +373,19 @@ function renderArticle(index) {
     });
   }
 
-  // Read aloud button
-  var readBtn = document.querySelector('.read-aloud-btn');
-  if (readBtn) {
-    readBtn.addEventListener('click', function() {
-      var isReading = this.dataset.reading === 'true';
-      if (isReading) {
+  // Read aloud buttons — three modes: en / cn / both
+  document.querySelectorAll('.read-aloud-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var mode = this.dataset.mode || 'en';
+      if (readAloudState.active && readAloudState.mode === mode) {
         stopReading();
       } else {
-        startReading(index);
+        if (readAloudState.active) stopReading();
+        startReading(index, mode);
       }
     });
-  }
+  });
 
   // Paragraph speaker icons
   document.querySelectorAll('.para-speak').forEach(function(icon) {
@@ -650,24 +693,37 @@ function findBestVoice(lang, gender) {
     // Language match
     if (vl === lang) score += 100;
     else if (vl.startsWith(lang.split('-')[0])) score += 50;
+    else if (lang === 'zh-CN' && vl.startsWith('zh')) score += 30;
     else if (vl.startsWith('en')) score += 20;
 
-    // Gender match (heuristic: female voices often have "female" or feminine names)
-    var isFemale = vn.indexOf('female') >= 0 || vn.indexOf('woman') >= 0 ||
-                   vn.indexOf('samantha') >= 0 || vn.indexOf('lisa') >= 0 ||
-                   vn.indexOf('karen') >= 0 || vn.indexOf('moira') >= 0 ||
-                   vn.indexOf('fiona') >= 0 || vn.indexOf('susan') >= 0 ||
-                   vn.indexOf('zira') >= 0 || vn.indexOf('veena') >= 0;
-    if (gender === 'female' && isFemale) score += 30;
-    else if (gender === 'male' && !isFemale) score += 30;
+    // Gender detection (more comprehensive)
+    var femaleNames = ['female','woman','samantha','lisa','karen','moira','fiona','susan','zira','veena','catherine','alice','mary','tingting','meijia'];
+    var maleNames = ['male','man','daniel','tom','alex','fred','oliver','arthur','jack','harry'];
+    var isFemale = femaleNames.some(function(n) { return vn.indexOf(n) >= 0; });
+    var isMale = maleNames.some(function(n) { return vn.indexOf(n) >= 0; });
+    if (gender === 'female' && isFemale) score += 35;
+    else if (gender === 'male' && isMale) score += 35;
+    else if (!isFemale && !isMale) score += 8;
 
-    // Prefer Google/System voices (higher quality)
-    if (vn.indexOf('google') >= 0) score += 40;
-    else if (vn.indexOf('microsoft') >= 0) score += 20;
-    else if (vn.indexOf('apple') >= 0) score += 15;
+    // Google / Wavenet / Neural = highest quality TTS
+    if (vn.indexOf('google') >= 0) score += 45;
+    if (vn.indexOf('wavenet') >= 0) score += 50;
+    if (vn.indexOf('neural') >= 0) score += 40;
+    if (vn.indexOf('natural') >= 0 || vn.indexOf('premium') >= 0 || vn.indexOf('enhanced') >= 0) score += 30;
 
-    // Prefer "natural" or "premium" or "wavenet" voices
-    if (vn.indexOf('natural') >= 0 || vn.indexOf('premium') >= 0 || vn.indexOf('wavenet') >= 0) score += 25;
+    // Microsoft / Edge voices
+    if (vn.indexOf('microsoft') >= 0) score += 20;
+
+    // macOS/iOS voices (Samantha, Daniel, Tingting etc.)
+    if (vn.indexOf('apple') >= 0) score += 15;
+    var macVoices = ['samantha','daniel','karen','tingting','meijia'];
+    if (macVoices.some(function(n) { return vn.indexOf(n) >= 0; })) score += 15;
+
+    // Local voices usually sound better
+    if (v.localService) score += 5;
+
+    // Penalize very low-quality voices
+    if (vn.indexOf('default') >= 0 || vn.indexOf('generic') >= 0) score -= 30;
 
     return { voice: v, score: score };
   });
@@ -1686,89 +1742,175 @@ function showSylPopup(btnElement, syl, partData) {
 }
 
 // ============================================================
-// Full Article Read-Aloud
+// Full Article Read-Aloud — EN / CN / Bilingual
 // ============================================================
 
 var readAloudState = {
   active: false,
+  mode: 'en',        // 'en' | 'cn' | 'both'
   currentPara: 0,
-  paragraphs: [],
-  articleIndex: 0
+  paragraphsEn: [],
+  paragraphsCn: [],
+  articleIndex: 0,
+  subPhase: 'en'     // for 'both' mode: 'en' then 'cn'
 };
 
-function startReading(articleIndex) {
+function startReading(articleIndex, mode) {
   if (!window.speechSynthesis) {
     alert('您的浏览器不支持语音朗读，请使用 Chrome 或 Safari。');
     return;
   }
 
+  var article = ARTICLES[articleIndex];
   readAloudState.active = true;
+  readAloudState.mode = mode || 'en';
   readAloudState.currentPara = 0;
   readAloudState.articleIndex = articleIndex;
-  readAloudState.paragraphs = ARTICLES[articleIndex].paragraphs;
+  readAloudState.subPhase = 'en';
+  readAloudState.paragraphsEn = article.paragraphs;
+  readAloudState.paragraphsCn = article.paragraphsCN || [];
 
-  var btn = document.querySelector('.read-aloud-btn');
-  if (btn) {
-    btn.dataset.reading = 'true';
-    btn.textContent = '⏹ 停止朗读';
-    btn.style.background = 'var(--accent-rose)';
-    btn.style.color = '#fff';
-    btn.style.borderColor = 'var(--accent-rose)';
-  }
-
-  // Highlight first paragraph
-  highlightReadingPara(0);
+  updateReadButtons();
+  highlightReadingPara(0, 'en');
   speakNextParagraph();
 }
 
 function speakNextParagraph() {
   if (!readAloudState.active) return;
 
-  var idx = readAloudState.currentPara;
-  if (idx >= readAloudState.paragraphs.length) {
+  var maxLen = Math.max(readAloudState.paragraphsEn.length, readAloudState.paragraphsCn.length);
+  if (readAloudState.currentPara >= maxLen) {
     stopReading();
     return;
   }
 
+  var text = '';
+  var lang = '';
+  var panel = '';
+
+  if (readAloudState.mode === 'en') {
+    text = readAloudState.paragraphsEn[readAloudState.currentPara] || '';
+    lang = 'en-US';
+    panel = 'en';
+    readAloudState.currentPara++;
+  } else if (readAloudState.mode === 'cn') {
+    text = readAloudState.paragraphsCn[readAloudState.currentPara] || '';
+    lang = 'zh-CN';
+    panel = 'cn';
+    readAloudState.currentPara++;
+  } else if (readAloudState.mode === 'both') {
+    if (readAloudState.subPhase === 'en') {
+      text = readAloudState.paragraphsEn[readAloudState.currentPara] || '';
+      lang = 'en-US';
+      panel = 'en';
+      readAloudState.subPhase = 'cn';
+    } else {
+      text = readAloudState.paragraphsCn[readAloudState.currentPara] || '';
+      lang = 'zh-CN';
+      panel = 'cn';
+      readAloudState.subPhase = 'en';
+      readAloudState.currentPara++;
+    }
+  }
+
+  if (!text) {
+    if (readAloudState.mode === 'both' && readAloudState.subPhase === 'cn') {
+      readAloudState.currentPara++;
+      readAloudState.subPhase = 'en';
+    }
+    advanceAfterSpeak();
+    return;
+  }
+
   // Strip HTML tags and vocab markers
-  var text = readAloudState.paragraphs[idx].replace(/\*\*/g, '').replace(/<[^>]+>/g, '');
-  highlightReadingPara(idx);
+  text = text.replace(/\*\*/g, '').replace(/<[^>]+>/g, '');
+
+  // Highlight current paragraph on the correct panel
+  highlightReadingPara(readAloudState.currentPara, panel);
 
   var config = getVoiceConfig();
   var utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = config.lang;
-  utterance.rate = config.rate;
-  utterance.pitch = 1;
-  var voice = findBestVoice(config.lang, config.gender);
-  if (voice) utterance.voice = voice;
+  utterance.lang = lang;
+  utterance.rate = lang === 'zh-CN' ? 0.88 : config.rate;
+  utterance.pitch = lang === 'zh-CN' ? 1.05 : 1;
 
-  utterance.onend = function() {
-    readAloudState.currentPara++;
-    if (readAloudState.active) speakNextParagraph();
-  };
+  // Smart voice selection for both languages via findBestVoice
+  if (lang === 'zh-CN') {
+    var zhVoice = findBestVoice('zh-CN', 'female');
+    if (!zhVoice) zhVoice = findBestVoice('zh-CN', '');
+    if (zhVoice) utterance.voice = zhVoice;
+  } else {
+    var voice = findBestVoice(config.lang, config.gender);
+    if (voice) utterance.voice = voice;
+  }
 
-  utterance.onerror = function() {
-    readAloudState.currentPara++;
-    if (readAloudState.active) speakNextParagraph();
-  };
+  utterance.onend = function() { advanceAfterSpeak(); };
+  utterance.onerror = function() { advanceAfterSpeak(); };
 
   window.speechSynthesis.speak(utterance);
 }
 
-function highlightReadingPara(idx) {
+function advanceAfterSpeak() {
+  if (!readAloudState.active) return;
+  setTimeout(speakNextParagraph, 250);
+}
+
+function highlightReadingPara(idx, panel) {
   // Remove previous highlights
-  document.querySelectorAll('.en-para.reading').forEach(function(el) {
+  document.querySelectorAll('.en-para.reading, .cn-para.reading').forEach(function(el) {
     el.classList.remove('reading');
   });
 
-  var paras = document.querySelectorAll('.en-para');
-  if (paras[idx]) {
-    paras[idx].classList.add('reading');
-    paras[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if (panel === 'en') {
+    var enParas = document.querySelectorAll('.en-para');
+    if (enParas[idx]) {
+      enParas[idx].classList.add('reading');
+      enParas[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  } else if (panel === 'cn') {
+    var cnParas = document.querySelectorAll('.cn-para');
+    if (cnParas[idx]) {
+      cnParas[idx].classList.add('reading');
+      cnParas[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
 }
 
-// Speak a single paragraph or sentence
+function stopReading() {
+  readAloudState.active = false;
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+  document.querySelectorAll('.en-para.reading, .cn-para.reading').forEach(function(el) {
+    el.classList.remove('reading');
+  });
+
+  updateReadButtons();
+}
+
+function updateReadButtons() {
+  document.querySelectorAll('.read-aloud-btn').forEach(function(btn) {
+    var mode = btn.dataset.mode;
+    if (readAloudState.active && mode === readAloudState.mode) {
+      btn.textContent = '⏹ 停止';
+      btn.style.background = 'var(--accent-rose)';
+      btn.style.color = '#fff';
+      btn.style.borderColor = 'var(--accent-rose)';
+    } else {
+      if (mode === 'en') {
+        btn.textContent = '🇬🇧 英文';
+      } else if (mode === 'cn') {
+        btn.textContent = '🇨🇳 中文';
+      } else {
+        btn.textContent = '🔊 双语';
+      }
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }
+  });
+}
+
+// Speak a single paragraph or sentence (used by per-paragraph speaker icons)
 function speakParagraph(text) {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
@@ -1783,7 +1925,7 @@ function speakParagraph(text) {
   window.speechSynthesis.speak(u);
 }
 
-// Extract the sentence at a given screen position
+// Extract the sentence at a given screen position (used by double-click handler)
 function getSentenceAtPoint(x, y) {
   var range;
   if (document.caretRangeFromPoint) {
@@ -1814,26 +1956,18 @@ function getSentenceAtPoint(x, y) {
   return text.substring(start, end).trim();
 }
 
-function stopReading() {
-  readAloudState.active = false;
-  if (window.speechSynthesis) window.speechSynthesis.cancel();
+// ============================================================
+// Hover Tooltip — 悬停 2 秒显示中文意思
+// ============================================================
 
-  document.querySelectorAll('.en-para.reading').forEach(function(el) {
-    el.classList.remove('reading');
-  });
-
-  var btn = document.querySelector('.read-aloud-btn');
-  if (btn) {
-    btn.dataset.reading = 'false';
-    btn.textContent = '🔊 全文朗读';
-    btn.style.background = '';
-    btn.style.color = '';
-    btn.style.borderColor = '';
-  }
+function ensureHoverTooltip() {
+  if (document.getElementById('hoverWordTip')) return;
+  var tip = document.createElement('div');
+  tip.id = 'hoverWordTip';
+  tip.style.cssText = 'position:fixed;background:#1e293b;color:#fff;padding:6px 14px;border-radius:8px;font-size:15px;font-weight:bold;z-index:2000;display:none;pointer-events:none;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,0.3);max-width:220px;text-align:center;line-height:1.4;';
+  document.body.appendChild(tip);
 }
 
-// Pre-load voices
-if (window.speechSynthesis) {
   window.speechSynthesis.getVoices();
   window.speechSynthesis.onvoiceschanged = () => {
     window.speechSynthesis.getVoices();
