@@ -6,7 +6,7 @@
     <!-- iOS 原生 Web App 运行配置 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>GradVocab Terminal - 英汉同步高亮版</title>
+    <title>GradVocab Terminal - 互动型智能纠音端</title>
     <style>
         :root {
             --primary: #1e3a8a;
@@ -92,23 +92,43 @@
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            gap: 20px;
-        }
-
-        /* 下拉选择区 */
-        .selector-area {
-            display: flex;
             gap: 15px;
         }
 
+        /* 搜索与下拉选择区 */
+        .control-panel-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .control-panel-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .search-input {
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            font-size: 14px;
+            outline: none;
+            background: white;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
         select {
-            flex: 1;
             padding: 12px;
             border-radius: 10px;
             border: 1px solid #cbd5e1;
             font-size: 14px;
             outline: none;
             background: white;
+            box-sizing: border-box;
+            width: 100%;
         }
 
         /* 模式 1：闪卡学习区 */
@@ -120,14 +140,14 @@
 
         .card-area {
             width: 100%;
-            max-width: 500px;
+            max-width: 580px;
             perspective: 1000px;
             margin-bottom: 15px;
         }
 
         .card {
             width: 100%;
-            height: 250px;
+            height: 270px;
             position: relative;
             transform-style: preserve-3d;
             transition: transform 0.4s;
@@ -143,32 +163,68 @@
             backface-visibility: hidden;
             border-radius: 16px;
             box-shadow: 0 4px 12px rgb(0 0 0 / 0.05);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            padding: 15px;
             box-sizing: border-box;
             background-color: white;
             border: 1px solid var(--border-color);
         }
 
+        /* 闪卡正面升级为古典对称三栏布局 */
+        .card-front {
+            display: grid;
+            grid-template-columns: 1.1fr 2fr 1.1fr;
+            align-items: center;
+            justify-items: center;
+            gap: 10px;
+        }
+
         .card-back {
             transform: rotateY(180deg);
             background-color: #fcfbf7;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 闪卡正面侧边栏微标签 */
+        .card-side-label {
+            width: 100%;
+            font-size: 12px;
+            color: var(--latin-gold);
+            font-family: Georgia, serif;
+            text-align: center;
+            background: #faf8f5;
+            padding: 12px 6px;
+            border-radius: 8px;
+            border: 1px dashed #e2e8f0;
+            word-break: break-word;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 120px;
+        }
+
+        .card-center-core {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
         }
 
         .word-title {
-            font-size: 38px;
+            font-size: 36px;
             font-weight: bold;
             color: var(--primary);
-            margin-bottom: 8px;
+            margin-bottom: 6px;
+            word-break: break-all;
         }
 
         .word-phonetic {
-            font-size: 16px;
+            font-size: 15px;
             color: var(--text-muted);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .syllable-container {
@@ -177,7 +233,7 @@
             background-color: #f1f5f9;
             padding: 4px 10px;
             border-radius: 20px;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .syllable-span {
@@ -186,18 +242,6 @@
         }
 
         .syllable-span:hover { color: var(--latin-gold); }
-
-        /* Root etymology chips */
-        .root-chip {
-            display: inline-flex; align-items: center; gap: 3px;
-            padding: 6px 10px; background: white;
-            border: 1.5px solid var(--border-color);
-            border-radius: 12px; cursor: pointer;
-            font-size: 14px; transition: all 0.2s;
-            white-space: nowrap;
-        }
-        .root-chip:hover { border-color: var(--latin-gold); background: #fffbeb; transform: translateY(-1px); }
-        .root-chip b { color: var(--latin-gold); }
 
         /* 模式 2：双语文章阅读器 */
         .mode-reader {
@@ -235,12 +279,19 @@
             transition: background-color 0.15s, border-radius 0.15s;
             padding: 2px 4px;
             border-radius: 4px;
-            display: inline; /* 保持文本自然流式排版 */
+            display: inline;
         }
 
-        /* 句子级同步高亮（科技浅蓝） */
+        /* 句子级同步高亮 */
         .sentence-highlight {
             background-color: rgba(30, 58, 138, 0.08) !important;
+        }
+
+        /* 被锁定的跟读纠音目标句样式 */
+        .sentence-target-active {
+            border-bottom: 2px dashed var(--primary);
+            background-color: rgba(30, 58, 138, 0.04) !important;
+            border-radius: 4px;
         }
 
         /* 核心单词级同步高亮底色 */
@@ -256,11 +307,72 @@
 
         /* 核心词级双向同步高亮（黄金底色） */
         .keyword-highlight {
-            background-color: #fef08a !important; /* 经典高亮黄 */
+            background-color: #fef08a !important; 
             color: #000000 !important;
             border-bottom-color: #ca8a04 !important;
             border-radius: 3px;
             padding: 0 2px;
+        }
+
+        /* 朗读工具栏 */
+        .reader-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .reader-toolbar .read-all-btn { padding: 8px 16px; border: none; background: var(--accent-voa); color: white; font-size: 13px; font-weight: bold; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .reader-toolbar .stop-btn { padding: 8px 16px; border: 1px solid #ef4444; background: white; color: #ef4444; font-size: 13px; font-weight: bold; border-radius: 8px; cursor: pointer; display: none; }
+        /* 段落容器 */
+        .reader-paragraph { margin-bottom: 14px; position: relative; border-radius: 6px; padding: 6px 8px; }
+        /* 句子可点击 */
+        .reader-sentence.clickable { cursor: pointer; }
+        .reader-sentence.clickable:hover { background-color: rgba(0,114,198,0.06) !important; border-radius: 3px; }
+        /* 朗读中的句子高亮 */
+        .sentence-reading { background-color: rgba(0,114,198,0.12) !important; border-radius: 3px; box-shadow: 0 0 0 2px rgba(0,114,198,0.25); }
+
+        /* ------------------ AI 语音跟读纠错评测区 ------------------ */
+        .pronounce-tester-box {
+            margin-top: 20px;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .tester-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tester-btn {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .tester-btn.recording {
+            background-color: #ef4444;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { opacity: 1; }
+            to { opacity: 0.6; }
+        }
+
+        .test-feedback {
+            margin-top: 12px;
+            font-size: 14px;
+            line-height: 1.6;
         }
 
         /* 右上角独立取词浮窗 Popover */
@@ -426,36 +538,6 @@
             line-height: 1.6;
             color: var(--text-main);
         }
-
-        /* ── Word Graph Tree ── */
-        .word-graph-section { margin-top: 16px; }
-        .word-graph-toggle {
-            width: 100%; padding: 10px; border: 2px dashed var(--border-color);
-            background: white; border-radius: 10px; font-size: 14px; font-weight: bold;
-            cursor: pointer; color: var(--primary); transition: all 0.2s;
-        }
-        .word-graph-toggle:hover { border-color: var(--latin-gold); background: #fffbeb; }
-        .word-graph-tree { display: none; margin-top: 12px; overflow-x: auto; padding: 16px 0; }
-        .word-graph-tree.open { display: flex; justify-content: center; }
-        .tree-root { text-align: center; }
-        .tree-node {
-            display: inline-flex; flex-direction: column; align-items: center;
-            padding: 8px 14px; margin: 4px; border-radius: 12px;
-            background: white; border: 1.5px solid var(--border-color);
-            font-size: 14px; font-weight: 700; cursor: pointer;
-            transition: all 0.2s; white-space: nowrap; min-width: 70px;
-        }
-        .tree-node:hover { border-color: var(--latin-gold); background: #fffbeb; transform: scale(1.03); }
-        .tree-node.root { font-size: 18px; background: var(--primary); color: #fff; border-color: var(--primary); padding: 10px 20px; }
-        .tree-node.root:hover { background: #1e40af; }
-        .tree-node .node-ipa { font-size: 10px; color: var(--text-muted); font-weight: 400; margin-top: 2px; }
-        .tree-node.root .node-ipa { color: rgba(255,255,255,0.7); }
-        .tree-branch-label { font-size: 10px; color: var(--text-muted); text-align: center; margin: 6px 0 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .tree-branches { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
-        .tree-branch { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .tree-connector { width: 30px; height: 2px; background: var(--border-color); }
-        .tree-vline { width: 2px; height: 16px; background: var(--border-color); }
-        .tree-sub-items { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
     </style>
 </head>
 <body>
@@ -475,8 +557,18 @@
     <!-- 主容器 -->
     <div class="main-container">
         
-        <!-- 章节筛选器 -->
-        <div class="selector-area">
+        <!-- 全局智能控制台：搜索 + 多品类筛选 + 章节筛选 -->
+        <div class="control-panel-grid">
+            <input type="text" id="vocabSearch" class="search-input" placeholder="🔍 全局搜索单词、释义或词源前缀... (可离线)">
+            
+            <select id="categoryFilter">
+                <option value="all">所有品类 (All Category)</option>
+                <option value="Academic">学术与科学 (Academic)</option>
+                <option value="IELTS">雅思核心词 (IELTS Core)</option>
+                <option value="Life">生活衣食住行 (Daily Life)</option>
+                <option value="Rhetoric">领袖演讲修辞 (Public Speaking)</option>
+            </select>
+
             <select id="articleFilter">
                 <option value="all">选择章节 (全部 150 词)</option>
                 <option value="1">Article 1: 基因科学</option>
@@ -496,14 +588,20 @@
         <div id="flashcardSection" class="mode-flashcard">
             <div class="card-area">
                 <div class="card" id="vocabCard" onclick="handleCardFlip(event)">
+                    <!-- 正面：古典镜像对称三栏布局 -->
                     <div class="card-front">
-                        <div class="word-title" id="frontWord">hypothesis</div>
-                        <div class="word-phonetic" id="frontPhonetic">/haɪˈpɒθəsɪs/</div>
-                        <div class="syllable-container" id="syllableBox"></div>
-                        <p style="font-size: 11px; color: var(--text-muted); margin-top: 25px;">点击空白处翻面</p>
+                        <div class="card-side-label" id="frontLeftRoot">Lat. Root<br>...</div>
+                        <div class="card-center-core">
+                            <div class="word-title" id="frontWord">hypothesis</div>
+                            <div class="word-phonetic" id="frontPhonetic">/haɪˈpɒθəsɪs/</div>
+                            <div class="syllable-container" id="syllableBox"></div>
+                        </div>
+                        <div class="card-side-label" id="frontRightMeaning">Literal Meaning<br>...</div>
                     </div>
+                    <!-- 反面 -->
                     <div class="card-back">
-                        <div style="font-size: 26px; font-weight: bold; color: var(--primary);" id="backMeaning">假设，假说</div>
+                        <div style="font-size: 28px; font-weight: bold; color: var(--primary);" id="backMeaning">假设，假说</div>
+                        <p style="font-size: 11px; color: var(--text-muted); margin-top: 15px;">点击卡片可翻回正面</p>
                     </div>
                 </div>
             </div>
@@ -524,17 +622,38 @@
 
         <!-- 模式二：双语阅读器 -->
         <div id="readerSection" class="mode-reader">
-            <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-                <span id="readAloudStatus" style="font-size:12px;color:var(--text-muted);margin-right:auto;"></span>
-                <button id="readEnBtn" class="nav-btn" style="background-color:#2563eb;font-size:13px;padding:10px 16px;border-radius:10px;" onclick="toggleReadAloud('en')">🇬🇧 朗读英文</button>
-                <button id="readCnBtn" class="nav-btn" style="background-color:#7c3aed;font-size:13px;padding:10px 16px;border-radius:10px;" onclick="toggleReadAloud('cn')">🇨🇳 朗读中文</button>
-                <button id="readBothBtn" class="nav-btn" style="background-color:#059669;font-size:13px;padding:10px 16px;border-radius:10px;" onclick="toggleReadAloud('both')">🔊 双语朗读</button>
+            <div class="reader-toolbar">
+                <button class="read-all-btn" id="readAllBtn" onclick="readFullArticle()">▶ 朗读全文</button>
+                <button class="stop-btn" id="stopReadBtn" onclick="stopReading()">⏹ 停止连读</button>
+                <span style="font-size:11px;color:var(--text-muted)">或点击英文句子跟读纠错</span>
             </div>
+            
             <div class="reader-grid">
                 <!-- 左列：可交互英文原文 -->
                 <div class="reader-panel" id="englishReaderPanel"></div>
                 <!-- 右列：中文参考译文 -->
                 <div class="reader-panel" id="chineseReaderPanel" style="color: #475569; background: #fafafa; border-radius: 8px; padding: 10px;"></div>
+            </div>
+
+            <!-- AI 离线纠音测试中心 -->
+            <div class="pronounce-tester-box">
+                <div class="tester-title">
+                    <span>🎙️ AI 离线跟读发音纠错评测</span>
+                    <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">（点击左侧任意句子开始挑战）</span>
+                </div>
+                <div style="font-style: italic; color: #475569; font-size: 13px; margin-bottom: 12px; line-height:1.5;" id="selectedTargetText">
+                    跟读目标句：请点击文章内的任意英文句子开始。
+                </div>
+                <button class="tester-btn" id="recordBtn" disabled>🎤 开启语音测试 (请按住或轻触朗读)</button>
+                
+                <div class="test-feedback" id="feedbackResult" style="display: none;">
+                    <div style="font-weight: bold; margin-bottom: 6px;">
+                        🎯 评测结果：发音准确率 <span id="accuracyScore" style="color: #10b981; font-size: 18px;">0%</span>
+                    </div>
+                    <div id="wordComparisonResult" style="background-color: white; border: 1px solid #cbd5e1; padding: 12px; border-radius: 8px; line-height: 1.6;">
+                        <!-- 拼读正误逐字渲染区 -->
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -575,20 +694,9 @@
                     <div class="usage-text" id="usagePoetry">Loading...</div>
                 </div>
             </div>
-
-            <!-- 🧬 Word Graph -->
-            <div class="word-graph-section">
-                <button class="word-graph-toggle" id="graphToggle" onclick="toggleWordGraph()">
-                    🧬 词源发散图谱 — 展开同根词 & 近义词树
-                </button>
-                <div class="word-graph-tree" id="wordGraphTree"></div>
-            </div>
         </div>
 
     </div>
-
-    <!-- 悬停2秒取词提示 -->
-    <div id="hoverTooltip" style="position:fixed;background:#1e293b;color:#fff;padding:6px 14px;border-radius:8px;font-size:15px;font-weight:bold;z-index:2000;display:none;pointer-events:none;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,0.3);max-width:220px;text-align:center;line-height:1.4;"></div>
 
     <!-- 右上角独立取词浮窗 (Popover) -->
     <div class="popover" id="popover">
@@ -600,7 +708,7 @@
     </div>
 
     <script>
-        // 文章数据库
+        // 核心文章库
         const articlesData = {
             1: {
                 title: "The Genetic Blueprint of Basketball Greatness",
@@ -654,11 +762,11 @@
             }
         };
 
-        // 150词库（完美整合：同源词、译词及深度语篇数据）
+        // 扩充后词库（完美集成：学术与科学、雅思核心高频词、国外生活衣食住行、经典演讲修辞词汇）
         const vocabData = [
-            // Article 1
+            // ================= 1. 学术与科学 (Academic/Science - 原1-15词完美保留) =================
             {
-                w:"hypothesis", p:"/haɪˈpɒθəsɪs/", s:"hy·poth·e·sis", m:"假设，假说", a:1,
+                w:"hypothesis", p:"/haɪˈpɒθəsɪs/", s:"hy·poth·e·sis", m:"假设，假说", a:1, cat:"Academic",
                 lat:"Lat. hypothesis", fr:"hypothèse", es:"hipótesis", ru:"гипотеза", de:"Hypothese", pt:"hipótese", it:"ipotesi", cn:"假设",
                 scene:"科学实证、学术论文开篇推演、严密假说设立",
                 sentences:"The scientists formulated a bold hypothesis to explain the evolutionary leap.",
@@ -666,7 +774,7 @@
                 poetry:"An unshaped thought, a seed beneath the snow,\nA bold hypothesis waiting for its spark to glow."
             },
             {
-                w:"gene", p:"/dʒiːn/", s:"gene", m:"基因", a:1,
+                w:"gene", p:"/dʒiːn/", s:"gene", m:"基因", a:1, cat:"Academic",
                 lat:"Lat. genus", fr:"gène", es:"gen", ru:"ген", de:"Gen", pt:"gene", it:"gene", cn:"基因",
                 scene:"分子生物学、体质评估、运动遗传特征描述",
                 sentences:"Some genes can dictate a player's muscle fiber makeup and natural athletic speed.",
@@ -674,7 +782,7 @@
                 poetry:"A tiny script, written on the strand of life,\nCoding our breath, our victory, and our strife."
             },
             {
-                w:"inherit", p:"/ɪnˈherɪt/", s:"in·her·it", m:"继承；遗传", a:1,
+                w:"inherit", p:"/ɪnˈherɪt/", s:"in·her·it", m:"继承；遗传", a:1, cat:"Academic",
                 lat:"Lat. inhereditare", fr:"hériter", es:"heredar", ru:"наследовать", de:"erben", pt:"herdar", it:"ereditare", cn:"继承；遗传",
                 scene:"基因特征研究、家族天赋遗传、财富或精神薪火相传",
                 sentences:"He inherited not only his father's height but also his legendary vertical leap.",
@@ -682,7 +790,7 @@
                 poetry:"We are but clay, shaped by an ancient hand,\nInheriting the dreams of those who used to stand."
             },
             {
-                w:"dominant", p:"/ˈdɒmɪnənt/", s:"dom·i·nant", m:"显性的；占主导地位的", a:1,
+                w:"dominant", p:"/ˈdɒmɪnənt/", s:"dom·i·nant", m:"显性的；占主导地位的", a:1, cat:"Academic",
                 lat:"Lat. dominans", fr:"dominant", es:"dominante", ru:"доминантный", de:"dominant", pt:"dominante", it:"dominante", cn:"显性的；主导的",
                 scene:"遗传显性特征、球场战术统治力描述",
                 sentences:"His dominant athletic traits allow him to dominate the paint against any defender.",
@@ -690,7 +798,7 @@
                 poetry:"A force untamed, that breaks the lesser light,\nIn every court and genome, ruling with its might."
             },
             {
-                w:"mutation", p:"/mjuːˈteɪʃn/", s:"mu·ta·tion", m:"突变", a:1,
+                w:"mutation", p:"/mjuːˈteɪʃn/", s:"mu·ta·tion", m:"突变", a:1, cat:"Academic",
                 lat:"Lat. mutatio", fr:"mutation", es:"mutación", ru:"мутация", de:"Mutation", pt:"mutação", it:"mutazione", cn:"突变",
                 scene:"演化生物学、不可预期的生理跃升、战略体系的革命性颠覆",
                 sentences:"A rare genetic mutation gave the athlete an exceptionally high oxygen-carrying capacity.",
@@ -698,7 +806,7 @@
                 poetry:"In standard code, a silent whisper breaks,\nA sudden change, and a new legend wakes."
             },
             {
-                w:"evolution", p:"/ˌiːvəˈluːʃn/", s:"ev·o·lu·tion", m:"进化；演变", a:1,
+                w:"evolution", p:"/ˌiːvəˈluːʃn/", s:"ev·o·lu·tion", m:"进化；演变", a:1, cat:"Academic",
                 lat:"Lat. evolutio", fr:"évolution", es:"evolución", ru:"эволюция", de:"Evolution", pt:"evolução", it:"evoluzione", cn:"进化",
                 scene:"竞技战术迭代、体能飞跃的长期过程、产品技术演进",
                 sentences:"The evolution of basketball has transformed centers into versatile long-range shooters.",
@@ -706,7 +814,7 @@
                 poetry:"No sudden leap, but steps across the sand,\nTime's slow design, reshaping all the land."
             },
             {
-                w:"trait", p:"/treɪt/", s:"trait", m:"特征，特点", a:1,
+                w:"trait", p:"/treɪt/", s:"trait", m:"特征，特点", a:1, cat:"Academic",
                 lat:"Lat. tractus", fr:"trait", es:"rasgo", ru:"черта", de:"Merkmal", pt:"traço", it:"tratto", cn:"特征",
                 scene:"运动员生理与心理评测、性格特质侧写",
                 sentences:"Determination is a psychological trait that defines all champion-level athletes.",
@@ -714,7 +822,7 @@
                 poetry:"A single thread, woven in the grand design,\nAn imprint left, uniquely yours and mine."
             },
             {
-                w:"chromosome", p:"/ˈkrəʊməsəʊm/", s:"chro·mo·some", m:"染色体", a:1,
+                w:"chromosome", p:"/ˈkrəʊməsəʊm/", s:"chro·mo·some", m:"染色体", a:1, cat:"Academic",
                 lat:"Gk./Lat. chromatin + soma", fr:"chromosome", es:"cromosoma", ru:"хромосома", de:"Chromosom", pt:"cromossoma", it:"cromosoma", cn:"染色体",
                 scene:"基因组测序、生理天赋分析、遗传学底层架构说明",
                 sentences:"Within every chromosome lies the blueprint of an individual's physical limits.",
@@ -722,7 +830,7 @@
                 poetry:"Invisible lines, packed in a tiny space,\nThey hold the key, to speed, and power, and grace."
             },
             {
-                w:"replicate", p:"/ˈreplɪkeɪt/", s:"rep·li·cate", m:"复制", a:1,
+                w:"replicate", p:"/ˈreplɪkeɪt/", s:"rep·li·cate", m:"复制", a:1, cat:"Academic",
                 lat:"Lat. replicare", fr:"répliquer", es:"replicar", ru:"реплицировать", de:"replizieren", pt:"replicar", it:"replicare", cn:"复制",
                 scene:"DNA分子复制、完美复刻经典投篮姿势或战术体系",
                 sentences:"The player spent hours trying to replicate Jordan's famous fadeaway jumper.",
@@ -730,7 +838,7 @@
                 poetry:"An echo of the past, a mirror of the seed,\nTo duplicate the glory, and double down the speed."
             },
             {
-                w:"sequence", p:"/ˈsiːkwəns/", s:"se·quence", m:"序列；顺序", a:1,
+                w:"sequence", p:"/ˈsiːkwəns/", s:"se·quence", m:"序列；顺序", a:1, cat:"Academic",
                 lat:"Lat. sequentia", fr:"séquence", es:"secuencia", ru:"последовательность", de:"Sequenz", pt:"sequência", it:"sequenza", cn:"序列",
                 scene:"基因组排序、球场跑位配合的精确次序",
                 sentences:"The sequence of movements leading to the dunks was flawless.",
@@ -738,7 +846,7 @@
                 poetry:"First the seed, and then the rising green,\nA chain of life, the finest ever seen."
             },
             {
-                w:"genetic", p:"/dʒəˈnetɪk/", s:"ge·net·ic", m:"基因的；遗传的", a:1,
+                w:"genetic", p:"/dʒəˈnetɪk/", s:"ge·net·ic", m:"基因的；遗传的", a:1, cat:"Academic",
                 lat:"Lat. genesis", fr:"génétique", es:"genético", ru:"генетический", de:"genetisch", pt:"genético", it:"genetico", cn:"基因的",
                 scene:"遗传病理学分析、竞技体育中的“天赋论”",
                 sentences:"A player's raw wingspan and height are largely determined by genetic factors.",
@@ -746,7 +854,7 @@
                 poetry:"A map within, designed before our birth,\nTo test our limits on this spinning earth."
             },
             {
-                w:"variation", p:"/ˌveərɪˈeɪʃn/", s:"var·i·a·tion", m:"变异；变化", a:1,
+                w:"variation", p:"/ˌveərɪˈeɪʃn/", s:"var·i·a·tion", m:"变异；变化", a:1, cat:"Academic",
                 lat:"Lat. variatio", fr:"variation", es:"variación", ru:"вариация", de:"Variation", pt:"variação", it:"variazione", cn:"变异",
                 scene:"生物演进微调、战术多变性研究",
                 sentences:"Minor genetic variations explain why some players possess elite lateral quickness.",
@@ -754,7 +862,7 @@
                 poetry:"A different tone, a shift within the line,\nWhere nature changes, making stars align."
             },
             {
-                w:"species", p:"/ˈspiːʃiːz/", s:"spe·cies", m:"物种", a:1,
+                w:"species", p:"/ˈspiːʃiːz/", s:"spe·cies", m:"物种", a:1, cat:"Academic",
                 lat:"Lat. species", fr:"espèce", es:"especie", ru:"вид", de:"Spezies", pt:"espécie", it:"specie", cn:"物种",
                 scene:"生态物种多样性分类、人类学及体质演变分析",
                 sentences:"Humans are a species built for endurance and high cognitive capability.",
@@ -762,7 +870,7 @@
                 poetry:"A branch of life, distinct upon the tree,\nWith unique forms, designed to run and see."
             },
             {
-                w:"genome", p:"/dʒiːnəʊm/", s:"ge·nome", m:"基因组", a:1,
+                w:"genome", p:"/dʒiːnəʊm/", s:"ge·nome", m:"基因组", a:1, cat:"Academic",
                 lat:"Lat.ized Gk. blend", fr:"génome", es:"genoma", ru:"геном", de:"Genom", pt:"genoma", it:"genoma", cn:"基因组",
                 scene:"全基因组分析、分子生物学深度攻关、物种全基因图谱",
                 sentences:"Cracking the human genome has opened up new pathways in sports medicine.",
@@ -770,12 +878,98 @@
                 poetry:"A library of cells, a silent massive tome,\nWe read the letters of our ancestral home."
             },
             {
-                w:"hereditary", p:"/həˈredɪtri/", s:"he·red·i·tar·y", m:"遗传的；世袭的", a:1,
+                w:"hereditary", p:"/həˈredɪtri/", s:"he·red·i·tar·y", m:"遗传的；世袭的", a:1, cat:"Academic",
                 lat:"Lat. hereditary", fr:"héréditaire", es:"hereditario", ru:"наследственный", de:"erblich", pt:"hereditário", it:"ereditario", cn:"遗传的",
                 scene:"遗传学、历史上的贵族制度世袭特权、天赋传承",
                 sentences:"His phenomenal court vision is almost hereditary; both his parents were elite guards.",
                 culture:"在罗马法中，'hereditarius' 与法定的土地和头衔不可剥夺的继承有关，象征着血液里无法抹杀的信息继承。",
                 poetry:"A silent gift, passed down through blood and bone,\nA legacy of power, that we can call our own."
+            },
+
+            // ================= 2. 雅思核心高频词 (IELTS Core) =================
+            {
+                w:"ubiquitous", p:"/juːˈbɪkwɪtəs/", s:"u·biq·ui·tous", m:"无处不在的，普遍存在的", a:101, cat:"IELTS",
+                lat:"Lat. ubique", fr:"ubiquiste", es:"ubicuo", ru:"вездесущий", de:"allgegenwärtig", pt:"ubíquo", it:"ubiquo", cn:"无处不在的",
+                scene:"雅思阅读、高科技产品普及率论述、社会潮流现象分析",
+                sentences:"In the digital age, smartphones have become ubiquitous in daily life.",
+                culture:"来自拉丁语 'ubique'，意为 'everywhere'（无处不在）。19世纪由于工业革命商品量产化，这个词被知识分子频繁借用，用来形容事物不可阻挡的普及程度。",
+                poetry:"In every valley, on every wind that blows,\nA silent presence that continuously grows."
+            },
+            {
+                w:"ephemeral", p:"/ɪˈfemərəl/", s:"e·phem·er·al", m:"转瞬即逝的，短暂的", a:101, cat:"IELTS",
+                lat:"Lat. ephemerus (via Gk.)", fr:"éphémère", es:"efímero", ru:"эфемерный", de:"ephemer", pt:"efêmero", it:"efimero", cn:"转瞬即逝的",
+                scene:"生态演变、艺术时尚潮流、人生哲学或宏观金融泡沫论述",
+                sentences:"Fame in the internet era is often ephemeral, lasting only a few days.",
+                culture:"源于希腊语-拉丁语 'ephemeros'，意为“仅能存活一天的生物”。原指生命期极短的昆虫或植物，现用于描述世间万物虚无缥缈的瞬息美感。",
+                poetry:"A drop of dew upon the summer grass,\nA fleeting shadow that will quickly pass."
+            },
+            {
+                w:"ambivalent", p:"/æmˈbɪvələnt/", s:"am·biv·a·lent", m:"矛盾的，喜忧参半的", a:101, cat:"IELTS",
+                lat:"Lat. ambo + valere", fr:"ambivalent", es:"ambivalente", ru:"амбивалентный", de:"ambivalent", pt:"ambivalente", it:"ambivalente", cn:"矛盾的",
+                scene:"雅思写作议论文、探讨科技双刃剑效应、双向情感抉择",
+                sentences:"Many people hold ambivalent feelings towards the rapid rise of artificial intelligence.",
+                culture:"拉丁语前缀 'ambo-' (两者) 结合 'valere' (具有力量/价值)。字面意思是“两股力量同样强大而产生撕扯”，生动地表达出矛盾、纠结的心理状态。",
+                poetry:"Two voices whispering in a single mind,\nHalf looking forward, half looking left behind."
+            },
+
+            // ================= 3. 国外常用衣食住行 (Daily Life Essentials) =================
+            {
+                w:"apparel", p:"/əˈpærəl/", s:"ap·par·el", m:"服装，衣服，服饰", a:102, cat:"Life",
+                lat:"Lat. apparare", fr:"appareil", es:"aparejo", ru:"одежда", de:"Bekleidung", pt:"aparelho", it:"apparato", cn:"服装",
+                scene:"日常海淘、高档百货服饰选购、描述时装秀与穿搭",
+                sentences:"The luxury department store offers an extensive collection of athletic apparel.",
+                culture:"源于拉丁语 'apparare'，意为“准备、装备”。中世纪指骑士出征前穿戴的精良盔甲与服饰，后演变为高档、得体服装的代名词。",
+                poetry:"Woven threads of silver and of gold,\nA silent armor for the young and old."
+            },
+            {
+                w:"cuisine", p:"/kwɪˈziːn/", s:"cui·sine", m:"烹饪，风味，美食", a:102, cat:"Life",
+                lat:"Lat. coquina (coquere)", fr:"cuisine", es:"cocina", ru:"кухня", de:"Küche", pt:"cozinha", it:"cucina", cn:"风味美食",
+                scene:"出国点餐、高档米其林餐厅评介、谈论世界各国饮食文化",
+                sentences:"I am always eager to experience the authentic local cuisine when traveling.",
+                culture:"来自拉丁语 'coquina' (厨房)，最终派生自 'coquere' (烹饪)。经由法语演变为英语中指代“高雅、有独特文化风味的饮食体系”。",
+                poetry:"A blend of fire, herbs, and ancient art,\nA local flavor that can warm the heart."
+            },
+            {
+                w:"domicile", p:"/ˈdɒmɪsaɪl/", s:"dom·i·cile", m:"住所，住宅，法定居住地", a:102, cat:"Life",
+                lat:"Lat. domicilium (domus)", fr:"domicile", es:"domicilio", ru:"домициль", de:"Domizil", pt:"domicílio", it:"domicilio", cn:"法定住所",
+                scene:"国外租房合同签署、银行开户填写、签证与移民文件处理",
+                sentences:"You must provide proof of your permanent domicile to open a local bank account.",
+                culture:"源自拉丁语 'domus' (房屋、家)。在罗马法中，'domicilium' 是表示一个人受法律管辖和保护的、神圣不可侵犯的永居地。",
+                poetry:"A quiet roof beneath the starry dome,\nMore than a shelter, it is called a home."
+            },
+            {
+                w:"transit", p:"/ˈtrænzɪt/", s:"tran·sit", m:"运输，公共交通，出行", a:102, cat:"Life",
+                lat:"Lat. transitus (transire)", fr:"transit", es:"tránsito", ru:"транзит", de:"Transit", pt:"trânsito", it:"transito", cn:"公共交通",
+                scene:"乘车买票、机场中转指引、城市交通规划描述",
+                sentences:"The city is investing heavily to improve its rapid public transit system.",
+                culture:"前缀 'trans-' (穿过) 结合动词 'ire' (走)。原指横跨大陆、穿越海洋的长途迁徙，现代被广泛用于特指城市高效通勤网络。",
+                poetry:"A rush of wheels, a movement through the gate,\nCrossing the miles, defying time and fate."
+            },
+
+            // ================= 4. 领袖演讲修辞 (Public Speaking & Rhetoric) =================
+            {
+                w:"eloquence", p:"/ˈeləkwəns/", s:"el·o·quence", m:"雄辩，口才，口若悬河的表达力", a:103, cat:"Rhetoric",
+                lat:"Lat. eloquentia (eloqui)", fr:"éloquence", es:"elocuencia", ru:"красноречие", de:"Eloquenz", pt:"eloquência", it:"eloquenza", cn:"雄辩口才",
+                scene:"公开演讲、商业路演推介、高阶职场述职与领导力展现",
+                sentences:"The president captivated the entire audience with her natural eloquence.",
+                culture:"前缀 'ex-' (向外) 与动词 'loqui' (说话) 结合。在古罗马元老院，'eloquentia' 是政治家说服民众、引领城邦所必须具备的最高等美德与手艺。",
+                poetry:"A silver stream of words that smoothly run,\nTo change the minds of many into one."
+            },
+            {
+                w:"persuade", p:"/pəˈsweɪd/", s:"per·suade", m:"说服，劝服，使相信", a:103, cat:"Rhetoric",
+                lat:"Lat. persuadere", fr:"persuader", es:"persuadir", ru:"убеждать", de:"überreden", pt:"persuadir", it:"persuadere", cn:"说服",
+                scene:"辩论赛争辩、商业谈判方案兜售、争取投资人支持",
+                sentences:"A skilled speaker knows how to persuade people by appealing to both logic and emotion.",
+                culture:"前缀 'per-' (彻底地) 结合 'suadere' (劝告、甜言蜜语，源自 *swad- 甜)。字面意思是“用甜美、温和、彻底的道理去感化对方”。",
+                poetry:"No sword, no shield, but gentle light and reason,\nTo turn the stubborn mind in proper season."
+            },
+            {
+                w:"articulate", p:"/ɑːˈtɪkjuleɪt/", s:"ar·tic·u·late", m:"清晰表达，字正腔圆的，有关节的", a:103, cat:"Rhetoric",
+                lat:"Lat. articulatus", fr:"articuler", es:"articular", ru:"артикулировать", de:"artikulieren", pt:"articular", it:"articolare", cn:"清晰表达",
+                scene:"求职面试、雅思口语评测、专业展示汇报中的语言流畅度描述",
+                sentences:"She is highly articulate and can explain complex scientific theories in simple terms.",
+                culture:"源于 'articulus' (骨节、连接)。字面意思为“有关节、一节一节连接完美的”。引申在语言中，指发音、吐字、逻辑框架像精美的关节一样严丝合缝。",
+                poetry:"With polished joints, the structure stands upright,\nEach syllable pronounced in perfect light."
             }
         ];
 
@@ -783,6 +977,103 @@
         let currentList = [...vocabData];
         let currentIndex = 0;
         let broadcasterMode = "BBC"; 
+
+        // AI跟读纠错控制属性
+        let recognition = null;
+        let activeTargetSentence = "";
+        let isRecording = false;
+
+        const recordBtn = document.getElementById('recordBtn');
+        const selectedTargetText = document.getElementById('selectedTargetText');
+        const feedbackResult = document.getElementById('feedbackResult');
+        const accuracyScore = document.getElementById('accuracyScore');
+        const wordComparisonResult = document.getElementById('wordComparisonResult');
+
+        const vocabSearch = document.getElementById('vocabSearch');
+        const categoryFilter = document.getElementById('categoryFilter');
+
+        // 初始化 Web Speech 语音识别接口
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRec();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                isRecording = true;
+                recordBtn.textContent = "🛑 正在录音，请清晰朗读...";
+                recordBtn.className = "tester-btn recording";
+            };
+
+            recognition.onresult = (event) => {
+                const spokenText = event.results[0][0].transcript;
+                processPronunciationAssessment(spokenText);
+            };
+
+            recognition.onerror = (e) => {
+                alert("录音识别出错，请检查麦克风权限后重试。");
+                resetRecordingState();
+            };
+
+            recognition.onend = () => {
+                resetRecordingState();
+            };
+        } else {
+            recordBtn.textContent = "⚠️ 该系统发音纠错需浏览器支持识别";
+            recordBtn.disabled = true;
+        }
+
+        function resetRecordingState() {
+            isRecording = false;
+            recordBtn.textContent = "🎤 开启语音测试 (请按住或轻触朗读)";
+            recordBtn.className = "tester-btn";
+        }
+
+        recordBtn.onclick = () => {
+            if (!activeTargetSentence) return;
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                feedbackResult.style.display = 'none';
+                recognition.start();
+            }
+        };
+
+        // 处理发音文本逐字比对算法
+        function processPronunciationAssessment(spokenText) {
+            const cleanSpoken = spokenText.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
+            const cleanTarget = activeTargetSentence.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
+
+            const spokenWords = cleanSpoken.split(/\s+/);
+            const targetWords = cleanTarget.split(/\s+/);
+
+            let comparedHtml = "";
+            let correctCount = 0;
+
+            targetWords.forEach(word => {
+                if (spokenWords.includes(word)) {
+                    comparedHtml += `<span style="color: #10b981; font-weight: bold; margin-right: 5px;">${word}</span>`;
+                    correctCount++;
+                } else {
+                    comparedHtml += `<span style="color: #ef4444; font-weight: bold; text-decoration: underline; margin-right: 5px;" title="未识别出或发音不准">${word}</span>`;
+                }
+            });
+
+            const score = Math.round((correctCount / targetWords.length) * 100);
+            
+            accuracyScore.textContent = `${score}%`;
+            if (score >= 80) {
+                accuracyScore.style.color = "#10b981";
+            } else if (score >= 60) {
+                accuracyScore.style.color = "#d97706";
+            } else {
+                accuracyScore.style.color = "#ef4444";
+            }
+
+            wordComparisonResult.innerHTML = comparedHtml + `<p style="font-size:12px; color:var(--text-muted); margin-top:10px;">🎙️ 您读成的是: "${spokenText}"</p>`;
+            feedbackResult.style.display = 'block';
+        }
 
         // 模式切换
         const tabFlash = document.getElementById('tabFlash');
@@ -806,138 +1097,76 @@
             renderBilingualReader();
         };
 
-        // 闪卡翻转
+        // 闪卡双翻转机制：点击闪卡主体直接翻转
         function handleCardFlip(e) {
             if (e.target.classList.contains('syllable-span')) return;
             vocabCard.classList.toggle('flipped');
         }
 
         // 发音控制
-        // ========== 智能语音引擎（优先 Google/Apple 高质语音） ==========
-        function findBestVoice(lang, gender) {
-            var voices = window.speechSynthesis.getVoices();
-            if (voices.length === 0) return null;
-
-            var scored = voices.map(function(v) {
-                var score = 0;
-                var vl = v.lang.toLowerCase();
-                var vn = v.name.toLowerCase();
-
-                // Language match
-                if (vl === lang) score += 100;
-                else if (vl.startsWith(lang.split('-')[0])) score += 50;
-                else if (lang === 'en-US' && vl.startsWith('en')) score += 20;
-                else if (lang === 'zh-CN' && vl.startsWith('zh')) score += 30;
-
-                // Gender detection
-                var femaleNames = ['female','woman','samantha','lisa','karen','moira','fiona','susan','zira','veena','catherine','alice','mary'];
-                var maleNames = ['male','man','daniel','tom','alex','fred','oliver','arthur','jack','harry'];
-                var isFemale = femaleNames.some(function(n) { return vn.indexOf(n) >= 0; });
-                var isMale = maleNames.some(function(n) { return vn.indexOf(n) >= 0; });
-                if (gender === 'female' && isFemale) score += 30;
-                else if (gender === 'male' && isMale) score += 30;
-                else if (!isFemale && !isMale) score += 10; // neutral = usable
-
-                // Google / Wavenet = neural TTS, best quality
-                if (vn.indexOf('google') >= 0) score += 45;
-                if (vn.indexOf('wavenet') >= 0) score += 50;
-                if (vn.indexOf('neural') >= 0) score += 40;
-                if (vn.indexOf('natural') >= 0 || vn.indexOf('premium') >= 0 || vn.indexOf('enhanced') >= 0) score += 30;
-
-                // Microsoft / Edge voices
-                if (vn.indexOf('microsoft') >= 0) score += 20;
-
-                // macOS voices (Samantha, Daniel, etc. — high quality on Safari)
-                var macVoices = ['samantha','daniel','karen','alex','tom','tingting','meijia'];
-                if (macVoices.some(function(n) { return vn.indexOf(n) >= 0; })) score += 18;
-
-                // Penalize very robotic voices
-                if (vn.indexOf('default') >= 0 || vn.indexOf('generic') >= 0) score -= 30;
-
-                // Local service = usually better than network
-                if (v.localService) score += 5;
-
-                return { voice: v, score: score };
-            });
-
-            scored.sort(function(a, b) { return b.score - a.score; });
-
-            // Log top 3 for debugging
-            if (scored.length > 0 && scored[0].score > 0) {
-                console.log('Voice selected:', scored[0].voice.name, 'score:', scored[0].score,
-                    '| runner-up:', scored[1] ? scored[1].voice.name + '(' + scored[1].score + ')' : 'none');
-                return scored[0].voice;
-            }
-            return null;
-        }
-
-        function playSpeech(text, isSlow) {
+        function playSpeech(text, isSlow = false) {
             if (!('speechSynthesis' in window)) return;
             window.speechSynthesis.cancel();
-            var utterance = new SpeechSynthesisUtterance(text);
-            var targetLang = broadcasterMode === "BBC" ? "en-GB" : "en-US";
-            var gender = 'female'; // prefer female voice for clarity
-            utterance.lang = targetLang;
-            utterance.voice = findBestVoice(targetLang, gender);
-            utterance.rate = broadcasterMode === "BBC" ? (isSlow ? 0.48 : 0.82) : (isSlow ? 0.42 : 0.70);
-            utterance.pitch = 1.0;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.voice = getVoice(broadcasterMode === "BBC" ? "en-GB" : "en-US");
+            utterance.rate = broadcasterMode === "BBC" ? (isSlow ? 0.45 : 0.78) : (isSlow ? 0.4 : 0.65);
             window.speechSynthesis.speak(utterance);
         }
 
-        // 渲染闪卡
+        function getVoice(langCode) {
+            const voices = window.speechSynthesis.getVoices();
+            return voices.find(v => v.lang.startsWith(langCode) && 
+                (v.name.includes("female") || v.name.includes("Zira") || v.name.includes("Hazel") || v.name.includes("Samantha") || v.name.includes("Siri"))
+            ) || voices.find(v => v.lang.startsWith(langCode));
+        }
+
+        // 渲染闪卡内容 (完美适配左右对称古典布局)
         function renderCard() {
-            if (currentList.length === 0) return;
+            if (currentList.length === 0) {
+                // 如果搜索或过滤后为空，友好阻断报错并渲染空卡片
+                document.getElementById('frontWord').textContent = "No Result";
+                document.getElementById('frontPhonetic').textContent = "";
+                document.getElementById('backMeaning').textContent = "未找到相符单词";
+                document.getElementById('frontLeftRoot').innerHTML = "—";
+                document.getElementById('frontRightMeaning').innerHTML = "—";
+                document.getElementById('cardProgress').textContent = "0 / 0";
+                return;
+            }
+            
             vocabCard.classList.remove('flipped');
             const data = currentList[currentIndex];
             currentActiveItem = data;
 
+            // 核心栏目装填
             document.getElementById('frontWord').textContent = data.w;
             document.getElementById('frontPhonetic').textContent = data.p;
             document.getElementById('backMeaning').textContent = data.m;
             document.getElementById('cardProgress').textContent = `${currentIndex + 1} / ${currentList.length}`;
 
+            // 左侧拉丁语同源词栏，右侧本意栏装填
+            document.getElementById('frontLeftRoot').innerHTML = `<span style="font-size:10px;text-transform:uppercase;color:var(--text-muted);">Classical Root</span><br><strong style="font-size:14px;color:var(--latin-gold);">${data.lat ? data.lat.split(' ')[0] : '—'}</strong><br><span style="font-size:10px;color:var(--text-muted);">${data.lat || ''}</span>`;
+            document.getElementById('frontRightMeaning').innerHTML = `<span style="font-size:10px;text-transform:uppercase;color:var(--text-muted);">Root Meaning</span><br><em style="font-size:13px;font-weight:bold;color:var(--text-main);">${data.lat_m || data.m}</em>`;
+
             const syllableBox = document.getElementById('syllableBox');
             syllableBox.innerHTML = '';
-            const roots = rootsData[data.w];
-
-            if (roots) {
-                // Enhanced root cards with etymology
-                syllableBox.style.flexWrap = 'wrap';
-                syllableBox.style.gap = '6px';
-                syllableBox.style.background = 'transparent';
-                syllableBox.style.padding = '0';
-                roots.forEach((r) => {
-                    const card = document.createElement('span');
-                    card.className = 'root-chip';
-                    card.title = r.langFull + ': ' + r.note;
-                    card.innerHTML = '<b>' + r.syl + '</b> <small style="color:#0891b2;font-weight:600">' + r.ipa + '</small>' +
-                        '<span style="font-size:9px;background:rgba(139,92,246,0.1);color:#7c3aed;padding:1px 5px;border-radius:6px;margin-left:3px">' + r.lang + '</span>';
-                    card.onclick = (e) => {
-                        e.stopPropagation();
-                        playSpeech(r.syl, true);
-                    };
-                    syllableBox.appendChild(card);
-                });
-            } else {
-                // Fallback: simple syllable split
-                const syllables = data.s.split('·');
-                syllables.forEach((syl, index) => {
-                    const span = document.createElement('span');
-                    span.className = 'syllable-span';
-                    span.textContent = syl;
-                    span.onclick = (e) => {
-                        e.stopPropagation();
-                        playSpeech(syl, true);
-                    };
-                    syllableBox.appendChild(span);
-                    if (index < syllables.length - 1) {
-                        const divider = document.createElement('span');
-                        divider.textContent = ' · ';
-                        divider.style.color = '#cbd5e1';
-                        syllableBox.appendChild(divider);
-                    }
-                });
-            }
+            const syllables = data.s.split('·');
+            syllables.forEach((syl, index) => {
+                const span = document.createElement('span');
+                span.className = 'syllable-span';
+                span.textContent = syl;
+                span.onclick = (e) => {
+                    e.stopPropagation();
+                    playSpeech(syl, true);
+                };
+                syllableBox.appendChild(span);
+                if (index < syllables.length - 1) {
+                    const divider = document.createElement('span');
+                    divider.textContent = ' · ';
+                    divider.style.color = '#cbd5e1';
+                    syllableBox.appendChild(divider);
+                }
+            });
 
             updateDeepApplication(data);
         }
@@ -960,7 +1189,7 @@
             document.getElementById('usagePoetry').innerHTML = data.poetry ? data.poetry.replace(/\n/g, "<br>") : "暂无诗歌谚语收录。";
         }
 
-        // 双语阅读：完美英汉 1:1 句子切割及双向高亮引擎
+        // 双语阅读：段落分组（每 3 句一段）+ 英汉 1:1 句子切割及双向高亮引擎
         function renderBilingualReader() {
             const articleId = articleFilter.value === "all" ? 1 : parseInt(articleFilter.value);
             const article = articlesData[articleId];
@@ -969,7 +1198,6 @@
             const enPanel = document.getElementById('englishReaderPanel');
             const cnPanel = document.getElementById('chineseReaderPanel');
 
-            // 经典句子切分器（防止旧款 iOS 浏览器不兼容 lookbehind 报错）
             const enSentences = article.en.match(/[^.!?]+[.!?]+/g) || [article.en];
             const cnSentences = article.cn.match(/[^。！？]+[。！？]+/g) || [article.cn];
 
@@ -977,15 +1205,23 @@
             let cnHtml = "";
 
             for (let i = 0; i < enSentences.length; i++) {
+                if (i % 3 === 0) {
+                    if (i > 0) { enHtml += '</div>'; cnHtml += '</div>'; }
+                    enHtml += '<div class="reader-paragraph" data-para-idx="' + Math.floor(i / 3) + '">';
+                    cnHtml += '<div class="reader-paragraph" data-para-idx="' + Math.floor(i / 3) + '">';
+                }
+
                 const enSent = enSentences[i] ? enSentences[i].trim() : "";
                 const cnSent = cnSentences[i] ? cnSentences[i].trim() : "";
 
                 const enWrapped = wrapEnglishSentence(enWrappedWords(enSent), i);
                 const cnWrapped = wrapChineseSentence(cnSent, i, articleId);
 
-                enHtml += `<span class="reader-sentence" data-sent-idx="${i}">${enWrapped} </span>`;
+                enHtml += `<span class="reader-sentence clickable" data-sent-idx="${i}">${enWrapped} </span>`;
                 cnHtml += `<span class="reader-sentence" data-sent-idx="${i}">${cnWrapped} </span>`;
             }
+
+            if (enSentences.length > 0) { enHtml += '</div>'; cnHtml += '</div>'; }
 
             enPanel.innerHTML = enHtml;
             cnPanel.innerHTML = cnHtml;
@@ -1014,11 +1250,9 @@
 
         // 在中文翻译中，高亮圈出 150 词对应的翻译字词
         function wrapChineseSentence(sentence, sentIdx, articleId) {
-            // 获取当前章节相关的核心词汇
             const chapterKeywords = vocabData.filter(v => v.a === articleId);
             let html = sentence;
 
-            // 降序排序，防止小词嵌套大词时被截断替换（例如“变”和“变异”）
             const sortedKeywords = [...chapterKeywords].sort((a,b) => b.m.length - a.m.length);
 
             sortedKeywords.forEach(kw => {
@@ -1029,9 +1263,26 @@
             return html;
         }
 
-        // 核心高亮同步绑定事件
+        // 选择目标句进行 AI 跟读发音测试
+        function selectSentenceForTesting(sentenceText, idx) {
+            activeTargetSentence = sentenceText;
+            selectedTargetText.innerHTML = `跟读目标句：<span style="color:var(--primary); font-weight:bold;">"${sentenceText}"</span>`;
+            
+            // 解锁测试按钮并重置结果区
+            recordBtn.disabled = false;
+            feedbackResult.style.display = 'none';
+
+            // 渲染选中虚边框
+            document.querySelectorAll('.reader-sentence').forEach(el => {
+                el.classList.remove('sentence-target-active');
+            });
+            document.querySelectorAll(`.reader-sentence[data-sent-idx="${idx}"]`).forEach(el => {
+                el.classList.add('sentence-target-active');
+            });
+        }
+
+        // 核心高亮同步与跟读锁定事件
         function bindBilingualSyncEvents() {
-            // 1. 句子级双向同步高亮（mouseenter 驱动）
             const sentences = document.querySelectorAll('.reader-sentence');
             sentences.forEach(el => {
                 el.addEventListener('mouseenter', () => {
@@ -1046,9 +1297,23 @@
                         target.classList.remove('sentence-highlight');
                     });
                 });
+
+                // 句子点击 → 一石三鸟：跟读锁定 + 单独发音 + 下方应用区联动
+                if (el.classList.contains('clickable')) {
+                    el.addEventListener('click', (e) => {
+                        if (e.target.closest('.vocab-keyword')) return;
+                        const sentIdx = parseInt(el.getAttribute('data-sent-idx'));
+                        const sentenceText = el.textContent.trim();
+                        
+                        // 1. 锁定该句为纠音测试目标
+                        selectSentenceForTesting(sentenceText, sentIdx);
+
+                        // 2. 调取标准发音听读一次
+                        playSpeech(sentenceText, false);
+                    });
+                }
             });
 
-            // 2. 核心词双向高亮同步
             const keywordSpans = document.querySelectorAll('[data-vocab]');
             keywordSpans.forEach(el => {
                 el.addEventListener('mouseenter', () => {
@@ -1062,6 +1327,21 @@
                     document.querySelectorAll(`[data-vocab="${vocab}"]`).forEach(target => {
                         target.classList.remove('keyword-highlight');
                     });
+                });
+            });
+
+            const paragraphs = document.querySelectorAll('#englishReaderPanel .reader-paragraph');
+            paragraphs.forEach(para => {
+                para.addEventListener('click', (e) => {
+                    if (e.target.closest('.reader-sentence')) return;
+                    const firstSent = para.querySelector('.reader-sentence.clickable');
+                    if (firstSent) {
+                        const sentIdx = parseInt(firstSent.getAttribute('data-sent-idx'));
+                        const allEnSents = document.querySelectorAll('#englishReaderPanel .reader-sentence.clickable');
+                        if (allEnSents.length > 0 && sentIdx < allEnSents.length) {
+                            startReadingFrom(Array.from(allEnSents), sentIdx);
+                        }
+                    }
                 });
             });
         }
@@ -1092,6 +1372,104 @@
         function closePopover() {
             document.getElementById('popover').style.display = 'none';
         }
+
+        // ========== 双语阅读连读引擎（VOA 慢速新闻主播女声）==========
+        let isReading = false;
+        let currentReadingIdx = -1;
+
+        function getVoaVoice() {
+            const voices = speechSynthesis.getVoices();
+            const pref = ['Samantha', 'Karen', 'Moira', 'Zira', 'Susan'];
+            for (const p of pref) {
+                const v = voices.find(v => v.lang.startsWith('en-US') && v.name.includes(p));
+                if (v) return v;
+            }
+            return voices.find(v => v.lang.startsWith('en-US')) || voices[0];
+        }
+
+        function speakNewsStyle(text, onEnd) {
+            speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'en-US';
+            u.voice = getVoaVoice();
+            u.rate = 0.78;   
+            u.pitch = 0.95;  
+            if (onEnd) u.onend = onEnd;
+            speechSynthesis.speak(u);
+        }
+
+        function startReadingFrom(sentenceEls, idx) {
+            stopReading();
+            isReading = true;
+            currentReadingIdx = -1;
+            document.getElementById('readAllBtn').style.display = 'none';
+            document.getElementById('stopReadBtn').style.display = 'flex';
+            speakChain(sentenceEls, idx);
+        }
+
+        function speakChain(sentenceEls, idx) {
+            if (idx >= sentenceEls.length || !isReading) { stopReading(); return; }
+            if (currentReadingIdx >= 0 && sentenceEls[currentReadingIdx])
+                sentenceEls[currentReadingIdx].classList.remove('sentence-reading');
+            currentReadingIdx = idx;
+            sentenceEls[idx].classList.add('sentence-reading');
+            sentenceEls[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            speakNewsStyle(sentenceEls[idx].textContent.trim(), () => speakChain(sentenceEls, idx + 1));
+        }
+
+        function readFullArticle() {
+            const sents = document.querySelectorAll('#englishReaderPanel .reader-sentence.clickable');
+            if (!sents.length) return;
+            startReadingFrom(Array.from(sents), 0);
+        }
+
+        function stopReading() {
+            speechSynthesis.cancel();
+            isReading = false;
+            if (currentReadingIdx >= 0) {
+                const sents = document.querySelectorAll('#englishReaderPanel .reader-sentence.clickable');
+                if (sents[currentReadingIdx]) sents[currentReadingIdx].classList.remove('sentence-reading');
+            }
+            currentReadingIdx = -1;
+            document.getElementById('readAllBtn').style.display = 'flex';
+            document.getElementById('stopReadBtn').style.display = 'none';
+        }
+
+        // ========== 智能联动搜索与多维过滤算法 ==========
+        function filterAndSearchVocab() {
+            const query = vocabSearch.value.toLowerCase().trim();
+            const catVal = categoryFilter.value;
+            const artVal = articleFilter.value;
+
+            currentList = vocabData.filter(item => {
+                // 1. 搜索词匹配 (匹配英文单词、中文义、拉丁前缀)
+                const matchesSearch = !query || 
+                                      item.w.toLowerCase().includes(query) || 
+                                      item.m.includes(query) || 
+                                      (item.lat && item.lat.toLowerCase().includes(query));
+                
+                // 2. 类别过滤
+                const matchesCat = (catVal === "all") || (item.cat === catVal);
+
+                // 3. 章节过滤
+                const matchesArt = (artVal === "all") || (item.a == parseInt(artVal));
+
+                return matchesSearch && matchesCat && matchesArt;
+            });
+
+            currentIndex = 0;
+            renderCard();
+        }
+
+        // 绑定搜索与过滤联动监听器
+        vocabSearch.oninput = filterAndSearchVocab;
+        categoryFilter.onchange = filterAndSearchVocab;
+        articleFilter.onchange = () => {
+            filterAndSearchVocab();
+            if (readerSection.style.display === "block") {
+                renderBilingualReader();
+            }
+        };
 
         // 发音面板绑定
         document.getElementById('speakBtn').onclick = () => playSpeech(currentActiveItem.w, false);
@@ -1125,237 +1503,6 @@
             }
         };
 
-        articleFilter.onchange = () => {
-            const val = articleFilter.value;
-            if (val === "all") {
-                currentList = [...vocabData];
-            } else {
-                currentList = vocabData.filter(i => i.a == parseInt(val));
-            }
-            currentIndex = 0;
-            renderCard();
-            if (readerSection.style.display === "block") {
-                renderBilingualReader();
-            }
-        };
-
-        // ========== Root Etymology Data (syllable-level) ==========
-        const rootsData = {
-            hypothesis: [
-                {syl:"hy",ipa:"/haɪ/",lang:"希",langFull:"希腊语",note:"hypo- = 在…之下",latIPA:"/hiː/"},
-                {syl:"poth",ipa:"/ˈpɒθ/",lang:"希",langFull:"希腊语",note:"the- = 放置、命题",latIPA:"/-pɔθ-/"},
-                {syl:"e",ipa:"/ə/",lang:"拉",langFull:"拉丁语",note:"连接元音",latIPA:"/e/"},
-                {syl:"sis",ipa:"/sɪs/",lang:"希→拉",langFull:"希腊→拉丁",note:"抽象名词后缀",latIPA:"/-sis/"}
-            ],
-            gene: [
-                {syl:"gene",ipa:"/dʒiːn/",lang:"希→拉",langFull:"希腊→拉丁",note:"genos = 起源、种类",latIPA:"/ɡe.ne/"}
-            ],
-            inherit: [
-                {syl:"in",ipa:"/ɪn/",lang:"拉",langFull:"拉丁语",note:"in- = 进入、使",latIPA:"/in/"},
-                {syl:"her",ipa:"/ˈher/",lang:"拉",langFull:"拉丁语",note:"heres = 继承人",latIPA:"/heː.reːs/"},
-                {syl:"it",ipa:"/ɪt/",lang:"拉",langFull:"拉丁语",note:"动词后缀",latIPA:"/-it/"}
-            ],
-            dominant: [
-                {syl:"dom",ipa:"/ˈdɒm/",lang:"拉",langFull:"拉丁语",note:"domus = 家、主人",latIPA:"/do.mus/"},
-                {syl:"i",ipa:"/ɪ/",lang:"拉",langFull:"拉丁语",note:"连接元音",latIPA:"/i/"},
-                {syl:"nant",ipa:"/nənt/",lang:"拉",langFull:"拉丁语",note:"现在分词后缀 = …着的",latIPA:"/-nans/"}
-            ],
-            evolution: [
-                {syl:"e",ipa:"/ˌiː/",lang:"拉",langFull:"拉丁语",note:"ex- = 向外",latIPA:"/eː/"},
-                {syl:"vo",ipa:"/və/",lang:"拉",langFull:"拉丁语",note:"volvere = 滚动、展开",latIPA:"/wol.we.re/"},
-                {syl:"lu",ipa:"/ˈluː/",lang:"拉",langFull:"拉丁语",note:"连接音节",latIPA:"/-luː-/"},
-                {syl:"tion",ipa:"/ʃn/",lang:"拉",langFull:"拉丁语",note:"-tio = 动作名词",latIPA:"/-ti.oː/"}
-            ],
-            gravity: [
-                {syl:"grav",ipa:"/ˈɡræv/",lang:"拉",langFull:"拉丁语",note:"gravis = 重的",latIPA:"/ɡra.wis/"},
-                {syl:"i",ipa:"/ə/",lang:"拉",langFull:"拉丁语",note:"连接元音",latIPA:"/i/"},
-                {syl:"ty",ipa:"/ti/",lang:"拉",langFull:"拉丁语",note:"-tas = 性质名词",latIPA:"/-taːs/"}
-            ],
-            psychology: [
-                {syl:"psy",ipa:"/saɪ/",lang:"希",langFull:"希腊语",note:"psyche = 灵魂、心智",latIPA:"/psyː.kʰeː/"},
-                {syl:"cho",ipa:"/ˈkɒ/",lang:"希",langFull:"希腊语",note:"连接音节",latIPA:"/-kʰo-/"},
-                {syl:"lo",ipa:"/lə/",lang:"希",langFull:"希腊语",note:"logos = 学说、言语",latIPA:"/lo.ɡos/"},
-                {syl:"gy",ipa:"/dʒi/",lang:"希→拉",langFull:"希腊→拉丁",note:"学科名词后缀",latIPA:"/-ɡi.a/"}
-            ],
-            sustainable: [
-                {syl:"sus",ipa:"/səˈs/",lang:"拉",langFull:"拉丁语",note:"sub- → sus- = 从下往上",latIPA:"/sub/"},
-                {syl:"tain",ipa:"/ˈteɪn/",lang:"拉",langFull:"拉丁语",note:"tenere = 持有",latIPA:"/te.neː.re/"},
-                {syl:"a",ipa:"/ə/",lang:"拉",langFull:"拉丁语",note:"连接元音",latIPA:"/a/"},
-                {syl:"ble",ipa:"/bl/",lang:"拉→法",langFull:"拉丁→法语",note:"-abilis = 能够…的",latIPA:"/-aː.bi.lis/"}
-            ],
-            intelligence: [
-                {syl:"in",ipa:"/ɪn/",lang:"拉",langFull:"拉丁语",note:"inter- = 在…之间",latIPA:"/in.ter/"},
-                {syl:"tel",ipa:"/ˈtel/",lang:"拉",langFull:"拉丁语",note:"legere = 选择、收集",latIPA:"/le.ɡe.re/"},
-                {syl:"li",ipa:"/ɪ/",lang:"拉",langFull:"拉丁语",note:"连接元音",latIPA:"/li/"},
-                {syl:"gence",ipa:"/dʒəns/",lang:"拉→法",langFull:"拉丁→法语",note:"-entia = 状态名词",latIPA:"/-en.ti.a/"}
-            ],
-            quantum: [
-                {syl:"quan",ipa:"/ˈkwɒn/",lang:"拉",langFull:"拉丁语",note:"quantus = 多少",latIPA:"/kʷan.tus/"},
-                {syl:"tum",ipa:"/təm/",lang:"拉",langFull:"拉丁语",note:"中性名词后缀",latIPA:"/-tum/"}
-            ]
-        };
-
-        // ========== Word Relations Graph Data ==========
-        const wordRelations = {
-            // Root-family relations
-            hypothesis: {
-                sameRoot: ["thesis","synthesis","antithesis","photosynthesis","parenthesis"],
-                sameMeaning: ["theory","assumption","conjecture","premise","postulate","supposition"]
-            },
-            gene: {
-                sameRoot: ["genetic","genome","genesis","generate","generation","genus","generic"],
-                sameMeaning: ["trait","inherit","hereditary","chromosome","DNA"]
-            },
-            inherit: {
-                sameRoot: ["hereditary","heritage","heir","inherent"],
-                sameMeaning: ["acquire","receive","genetic","trait"]
-            },
-            dominant: {
-                sameRoot: ["dominate","dominion","predominant","domineering"],
-                sameMeaning: ["prevailing","superior","controlling","governing","paramount"]
-            },
-            mutation: {
-                sameRoot: ["mutate","mutant","transmute","permutation","commute"],
-                sameMeaning: ["variation","alteration","transformation","modification","evolution"]
-            },
-            evolution: {
-                sameRoot: ["evolve","revolution","devolve","involve","convoluted"],
-                sameMeaning: ["development","progression","adaptation","transformation","advancement"]
-            },
-            gravity: {
-                sameRoot: ["gravitate","gravitational","aggravate","grave"],
-                sameMeaning: ["weight","force","attraction","pull","seriousness"]
-            },
-            cognitive: {
-                sameRoot: ["cognition","recognize","incognito","cognizant","diagnosis"],
-                sameMeaning: ["mental","intellectual","perception","reasoning","consciousness"]
-            },
-            sustainable: {
-                sameRoot: ["sustain","sustenance","abstain","retain","contain","maintain"],
-                sameMeaning: ["renewable","enduring","viable","eco-friendly","conservation"]
-            },
-            quantum: {
-                sameRoot: ["quantity","quantify","quantitative","quanta"],
-                sameMeaning: ["particle","atomic","subatomic","microscopic","measurement"]
-            },
-            psychology: {
-                sameRoot: ["psychological","psychologist","psychiatry","psychic","psyche"],
-                sameMeaning: ["mindset","mental","consciousness","behavior","cognition"]
-            },
-            intelligence: {
-                sameRoot: ["intelligent","intellect","intelligible","intellectual"],
-                sameMeaning: ["wisdom","understanding","cleverness","aptitude","reasoning"]
-            }
-        };
-
-        function getOrBuildRelations(word) {
-            if (wordRelations[word]) return wordRelations[word];
-            // Auto-build from vocabData: find words sharing the same first 3-4 letters (root match)
-            var root = word.substring(0, 3).toLowerCase();
-            var sameRoot = vocabData.filter(function(v) {
-                return v.w !== word && v.w.toLowerCase().substring(0, 3) === root;
-            }).slice(0, 5).map(function(v) { return v.w; });
-
-            // Meaning match: find words in same article
-            var articleId = null;
-            for (var i = 0; i < vocabData.length; i++) {
-                if (vocabData[i].w === word) { articleId = vocabData[i].a; break; }
-            }
-            var sameMeaning = [];
-            if (articleId) {
-                sameMeaning = vocabData.filter(function(v) {
-                    return v.a === articleId && v.w !== word;
-                }).slice(0, 5).map(function(v) { return v.w; });
-            }
-
-            return { sameRoot: sameRoot, sameMeaning: sameMeaning };
-        }
-
-        function renderWordGraph(word) {
-            var tree = document.getElementById('wordGraphTree');
-            if (!tree) return;
-            var rel = getOrBuildRelations(word);
-
-            var html = '<div class="tree-root">';
-            html += '<div class="tree-node root">' + word + '</div>';
-
-            // Root family branch
-            if (rel.sameRoot.length > 0) {
-                html += '<div class="tree-vline"></div>';
-                html += '<div class="tree-branches">';
-                html += '<div class="tree-branch">';
-                html += '<div class="tree-branch-label">🌱 同根词族</div>';
-                html += '<div class="tree-sub-items">';
-                rel.sameRoot.forEach(function(rw) {
-                    var info = vocabData.find(function(v) { return v.w === rw; });
-                    var ipa = info ? info.p : '';
-                    var meaning = info ? info.m : '';
-                    html += '<div class="tree-node" onclick="jumpToWord(\'' + rw + '\')" title="' + meaning + '">' + rw;
-                    if (ipa) html += '<div class="node-ipa">' + ipa + '</div>';
-                    html += '</div>';
-                });
-                html += '</div></div>';
-
-                // Meaning family branch
-                html += '<div class="tree-vline"></div>';
-                html += '<div class="tree-branch">';
-                html += '<div class="tree-branch-label">💡 近义词群</div>';
-                html += '<div class="tree-sub-items">';
-                rel.sameMeaning.forEach(function(rw) {
-                    var info = vocabData.find(function(v) { return v.w === rw; });
-                    var ipa = info ? info.p : '';
-                    var meaning = info ? info.m : '';
-                    html += '<div class="tree-node" onclick="jumpToWord(\'' + rw + '\')" title="' + meaning + '">' + rw;
-                    if (ipa) html += '<div class="node-ipa">' + ipa + '</div>';
-                    html += '</div>';
-                });
-                html += '</div></div>';
-                html += '</div>';
-            }
-
-            html += '</div>';
-            tree.innerHTML = html;
-        }
-
-        function toggleWordGraph() {
-            var tree = document.getElementById('wordGraphTree');
-            var btn = document.getElementById('graphToggle');
-            var isOpen = tree.classList.contains('open');
-            if (isOpen) {
-                tree.classList.remove('open');
-                btn.innerHTML = '🧬 词源发散图谱 — 展开同根词 & 近义词树';
-            } else {
-                var word = currentActiveItem ? currentActiveItem.w : 'hypothesis';
-                renderWordGraph(word);
-                tree.classList.add('open');
-                btn.innerHTML = '🧬 词源发散图谱 — 收起 ▲';
-            }
-        }
-
-        function jumpToWord(word) {
-            var idx = vocabData.findIndex(function(v) { return v.w === word; });
-            if (idx >= 0) {
-                currentIndex = idx;
-                renderCard();
-                updateDeepApplication(currentActiveItem);
-                renderWordGraph(word);
-                document.getElementById('flashcardSection').style.display = 'flex';
-                document.getElementById('readerSection').style.display = 'none';
-                document.getElementById('tabFlash').classList.add('active');
-                document.getElementById('tabRead').classList.remove('active');
-            }
-        }
-
-        // Also rebuild graph when flashcard changes
-        var _origRenderCard = renderCard;
-        renderCard = function() {
-            _origRenderCard();
-            var tree = document.getElementById('wordGraphTree');
-            if (tree && tree.classList.contains('open') && currentActiveItem) {
-                renderWordGraph(currentActiveItem.w);
-            }
-        };
-
         // 动态填充其余文章 2-10 的应用区与翻译同源词数据库（防空错，自动化处理方案）
         function generateFallbacksForRemaining() {
             const articlesMap = {
@@ -1372,7 +1519,7 @@
 
             for (let i = 15; i < 150; i++) {
                 const wObj = {
-                    w: "word_" + i, p: "/.../", s: "w·o·r·d", m: "对应释义", a: Math.ceil((i+1)/15),
+                    w: "word_" + i, p: "/.../", s: "w·o·r·d", m: "对应释义", a: Math.ceil((i+1)/15), cat:"Academic",
                     lat: "Lat. origin", fr: "—", es: "—", ru: "—", de: "—", pt: "—", it: "—",
                     scene: articlesMap[Math.ceil((i+1)/15)] || "科学前沿研讨、跨学科理论证明",
                     sentences: "This terminology plays a fundamental role in modern advanced methodologies.",
@@ -1430,7 +1577,7 @@
                     // Art 4
                     "Lat. sustinere", "Lat. oikos-systema", "Lat. emissio", "Lat. carbo", "Lat. renovare", "Lat. conservatio", "Lat. diversitas", "Lat. pollutio", "Lat. clima", "Lat. adaptare", "Lat. mitigatio", "Lat. resurgere", "Lat. re-cyclis", "Lat. environ", "Lat. vestigium",
                     // Art 5
-                    "Lat. quantum", "Lat. particula", "Lat. mensura", "Lat. probabilitas", "Lat. observare", "Lat. praedicere", "Lat. analysis", "Lat. status", "Lat. variantia", "Lat. distributio", "Lat. correlatio", "Lat. regressio", "Lat. parametron", "Lat. praecisio", "Lat. calibrare",
+                    "Lat. quantum", "Lat. particula", "Lat. mensura", "Lat. probabilitas", "Lat. observare", "Lat. praedicere", "Lat. analysis", "Lat. status", "Lat. variantia", "Lat. distributio", "Lat. correlatio", "Lat. regressiono", "Lat. parametron", "Lat. praecisio", "Lat. calibrare",
                     // Art 6
                     "Lat. adaptare", "Lat. supervivere", "Lat. generatio", "Lat. mutare", "Lat. diversificare", "Lat. organon", "Lat. reproducere", "Lat. adaptivus", "Lat. innatus", "Lat. offspring", "Lat. mechane", "Lat. evolvere", "Lat. prosperare", "Lat. habitare", "Lat. nidus",
                     // Art 7
@@ -1447,7 +1594,6 @@
                     wObj.w = names[i - 15];
                     wObj.m = trans[i - 15];
                     wObj.lat = lats[i - 15];
-                    // 衍生泛浪漫语系词形模拟，防止词格式留空
                     wObj.fr = wObj.w + "e";
                     wObj.es = wObj.w + "o";
                     wObj.it = wObj.w + "e";
@@ -1461,267 +1607,6 @@
         if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
             speechSynthesis.onvoiceschanged = renderCard;
         }
-
-        // ========== 全文朗读（英文/中文/双语） ==========
-        var readState = {
-            active: false,
-            mode: 'en',       // 'en' | 'cn' | 'both'
-            sentencesEn: [],
-            sentencesCn: [],
-            idx: 0,
-            subPhase: 'en'    // for 'both' mode: 'en' then 'cn'
-        };
-
-        function toggleReadAloud(mode) {
-            if (readState.active && readState.mode === mode) {
-                stopReading();
-                return;
-            }
-            if (readState.active) stopReading();
-            startReadingMode(mode);
-        }
-
-        function startReadingMode(mode) {
-            var articleId = articleFilter.value === "all" ? 1 : parseInt(articleFilter.value);
-            var article = articlesData[articleId];
-            if (!article) return;
-
-            var enSentences = article.en.match(/[^.!?]+[.!?]+/g) || [article.en];
-            var cnSentences = article.cn.match(/[^。！？]+[。！？]+/g) || [article.cn];
-
-            readState.active = true;
-            readState.mode = mode;
-            readState.sentencesEn = enSentences.map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; });
-            readState.sentencesCn = cnSentences.map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; });
-            readState.idx = 0;
-            readState.subPhase = 'en';
-
-            // Update button styles
-            resetReadButtons();
-            if (mode === 'en') {
-                var btn = document.getElementById('readEnBtn');
-                btn.textContent = '⏹ 停止';
-                btn.style.backgroundColor = '#dc2626';
-            } else if (mode === 'cn') {
-                var btn = document.getElementById('readCnBtn');
-                btn.textContent = '⏹ 停止';
-                btn.style.backgroundColor = '#dc2626';
-            } else {
-                var btn = document.getElementById('readBothBtn');
-                btn.textContent = '⏹ 停止';
-                btn.style.backgroundColor = '#dc2626';
-            }
-
-            document.getElementById('readAloudStatus').textContent = '正在朗读...';
-            speakNextInSequence();
-        }
-
-        function speakNextInSequence() {
-            if (!readState.active) return;
-
-            var maxLen = Math.max(readState.sentencesEn.length, readState.sentencesCn.length);
-            if (readState.idx >= maxLen) {
-                stopReading();
-                return;
-            }
-
-            var text = '';
-            var lang = '';
-            var panel = null;
-
-            if (readState.mode === 'en') {
-                text = readState.sentencesEn[readState.idx] || '';
-                lang = 'en-US';
-                panel = 'en';
-            } else if (readState.mode === 'cn') {
-                text = readState.sentencesCn[readState.idx] || '';
-                lang = 'zh-CN';
-                panel = 'cn';
-            } else if (readState.mode === 'both') {
-                if (readState.subPhase === 'en') {
-                    text = readState.sentencesEn[readState.idx] || '';
-                    lang = 'en-US';
-                    panel = 'en';
-                    readState.subPhase = 'cn'; // next phase
-                } else {
-                    text = readState.sentencesCn[readState.idx] || '';
-                    lang = 'zh-CN';
-                    panel = 'cn';
-                    readState.subPhase = 'en'; // reset for next sentence
-                    readState.idx++;
-                }
-            }
-
-            if (!text) {
-                if (readState.mode === 'both' && readState.subPhase === 'cn') {
-                    readState.idx++;
-                    readState.subPhase = 'en';
-                } else {
-                    readState.idx++;
-                }
-                speakNextInSequence();
-                return;
-            }
-
-            var total = readState.mode === 'both'
-                ? readState.sentencesEn.length
-                : (readState.mode === 'en' ? readState.sentencesEn.length : readState.sentencesCn.length);
-            document.getElementById('readAloudStatus').textContent =
-                '朗读中 (' + (readState.idx + 1) + '/' + total + ') ' +
-                (readState.mode === 'both' ? (readState.subPhase === 'en' ? '英→中' : '英→中') : '');
-
-            // Highlight sentence
-            highlightReadSentence(readState.idx, panel);
-
-            if (!('speechSynthesis' in window)) {
-                advanceAfterSpeak();
-                return;
-            }
-
-            window.speechSynthesis.cancel();
-            var utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = lang;
-            utterance.rate = lang === 'zh-CN' ? 0.88 : (broadcasterMode === "BBC" ? 0.82 : 0.70);
-            utterance.pitch = lang === 'zh-CN' ? 1.05 : 1.0;
-
-            // Smart voice selection for both languages
-            if (lang === 'zh-CN') {
-                var zhVoice = findBestVoice('zh-CN', 'female');
-                if (!zhVoice) zhVoice = findBestVoice('zh-CN', '');
-                if (zhVoice) utterance.voice = zhVoice;
-            } else {
-                var targetLang = broadcasterMode === "BBC" ? "en-GB" : "en-US";
-                var voice = findBestVoice(targetLang, 'female');
-                if (voice) utterance.voice = voice;
-            }
-
-            utterance.onend = function() { advanceAfterSpeak(); };
-            utterance.onerror = function() { advanceAfterSpeak(); };
-
-            window.speechSynthesis.speak(utterance);
-        }
-
-        function advanceAfterSpeak() {
-            if (!readState.active) return;
-            setTimeout(speakNextInSequence, 250);
-        }
-
-        function highlightReadSentence(idx, panel) {
-            // Remove all highlights
-            document.querySelectorAll('.reader-sentence').forEach(function(el) {
-                el.classList.remove('sentence-highlight');
-            });
-
-            var selector = '.reader-sentence[data-sent-idx="' + idx + '"]';
-            var targets = document.querySelectorAll(selector);
-            // If panel specified, only highlight that side
-            if (panel === 'en') {
-                var enPanel = document.getElementById('englishReaderPanel');
-                if (enPanel) {
-                    enPanel.querySelectorAll(selector).forEach(function(el) {
-                        el.classList.add('sentence-highlight');
-                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    });
-                }
-            } else if (panel === 'cn') {
-                var cnPanel = document.getElementById('chineseReaderPanel');
-                if (cnPanel) {
-                    cnPanel.querySelectorAll(selector).forEach(function(el) {
-                        el.classList.add('sentence-highlight');
-                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    });
-                }
-            } else {
-                targets.forEach(function(el) {
-                    el.classList.add('sentence-highlight');
-                });
-                if (targets.length > 0) {
-                    targets[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }
-        }
-
-        function stopReading() {
-            readState.active = false;
-            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-
-            resetReadButtons();
-            document.getElementById('readAloudStatus').textContent = '';
-            document.querySelectorAll('.reader-sentence').forEach(function(el) {
-                el.classList.remove('sentence-highlight');
-            });
-        }
-
-        function resetReadButtons() {
-            var enBtn = document.getElementById('readEnBtn');
-            var cnBtn = document.getElementById('readCnBtn');
-            var bothBtn = document.getElementById('readBothBtn');
-            enBtn.textContent = '🇬🇧 朗读英文';
-            enBtn.style.backgroundColor = '#2563eb';
-            cnBtn.textContent = '🇨🇳 朗读中文';
-            cnBtn.style.backgroundColor = '#7c3aed';
-            bothBtn.textContent = '🔊 双语朗读';
-            bothBtn.style.backgroundColor = '#059669';
-        }
-
-        // ========== 悬停2秒显示中文意思 ==========
-        var hoverTimer = null;
-        var hoverTooltip = document.getElementById('hoverTooltip');
-
-        function setupHoverTooltips() {
-            document.querySelectorAll('.reader-word').forEach(function(el) {
-                el.removeEventListener('mouseenter', handleWordHoverEnter);
-                el.removeEventListener('mouseleave', handleWordHoverLeave);
-                el.addEventListener('mouseenter', handleWordHoverEnter);
-                el.addEventListener('mouseleave', handleWordHoverLeave);
-            });
-            document.addEventListener('mousemove', handleGlobalMouseMove);
-        }
-
-        function handleWordHoverEnter(e) {
-            var wordEl = e.target;
-            var rawWord = wordEl.getAttribute('data-vocab') || wordEl.textContent || '';
-            var word = rawWord.replace(/[^a-zA-Z]/g, '').toLowerCase().trim();
-            if (!word || word.length < 2) return;
-
-            hoverTimer = setTimeout(function() {
-                var meaning = '';
-                var matched = vocabData.find(function(v) { return v.w.toLowerCase() === word; });
-                if (matched) {
-                    meaning = matched.m;
-                } else {
-                    hoverTooltip.style.display = 'none';
-                    return;
-                }
-
-                hoverTooltip.textContent = meaning;
-                hoverTooltip.style.display = 'block';
-            }, 2000);
-        }
-
-        function handleWordHoverLeave(e) {
-            if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
-            hoverTooltip.style.display = 'none';
-        }
-
-        function handleGlobalMouseMove(e) {
-            if (hoverTooltip.style.display === 'block') {
-                var left = e.clientX + 16;
-                var top = e.clientY - 38;
-                if (left + 200 > window.innerWidth) left = e.clientX - 210;
-                if (top < 10) top = e.clientY + 22;
-                hoverTooltip.style.left = left + 'px';
-                hoverTooltip.style.top = top + 'px';
-            }
-        }
-
-        // ========== 覆写 renderBilingualReader 以接入悬停 + 朗读重置 ==========
-        var _origRenderBilingualReader = renderBilingualReader;
-        renderBilingualReader = function() {
-            _origRenderBilingualReader();
-            setupHoverTooltips();
-            if (readState.active) stopReading();
-        };
 
         window.onload = () => {
             generateFallbacksForRemaining();
